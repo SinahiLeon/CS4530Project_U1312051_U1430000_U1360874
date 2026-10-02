@@ -8,12 +8,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,14 +32,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.drawingdemov2.ui.theme.DrawingDemoV2Theme
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.HorizontalRule
+import androidx.compose.material.icons.filled.Square
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,8 +53,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             DrawingDemoV2Theme {
                 //DrawCirlce()
-                //DrawingCanvasPoints()
-                DrawingCanvas(BrushType.RECTANGLE)
+                DrawingCanvasPoints()
+                //DrawingCanvas(BrushType.RECTANGLE)
             }
         }
     }
@@ -49,43 +64,79 @@ class MainActivity : ComponentActivity() {
 fun DrawingCanvasPoints() {
     var strokes by remember { mutableStateOf(listOf<List<Offset>>()) }
     var currentStroke by remember { mutableStateOf(listOf<Offset>()) }
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxSize()
-            //We capture touch input with
-            // pointerInput and detectDragGestures.
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        currentStroke = listOf(offset)
-                        //if you update current stroke live here not on DragEnd,
-                        // then you do not need a second loop
-                        strokes = strokes + listOf(currentStroke)
-                    },
-                    onDrag = { change, x ->
-                        change.consume()
-                        currentStroke = currentStroke + change.position
-                        //if you update current stroke live here not on DragEnd,
-                        // then you do not need a second loop
-                        strokes = strokes.dropLast(1) + listOf(currentStroke)
-                    },
-                    onDragEnd = {
-                        //strokes = strokes + listOf(currentStroke)
-                        currentStroke = emptyList()
-                    }
-                )
-            }
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Draw all completed strokes
-        strokes.forEach { stroke ->
-            for (i in 0 until stroke.size - 1) {
-                drawLine(
-                    color = Color.Red,
-                    start = stroke[i],
-                    end = stroke[i + 1],
-                    strokeWidth = 8f
-                )
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                //We capture touch input with
+                // pointerInput and detectDragGestures.
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            currentStroke = listOf(offset)
+                            //if you update current stroke live here not on DragEnd,
+                            // then you do not need a second loop
+                            strokes = strokes + listOf(currentStroke)
+                        },
+                        onDrag = { change, x ->
+                            change.consume()
+                            currentStroke = currentStroke + change.position
+                            //if you update current stroke live here not on DragEnd,
+                            // then you do not need a second loop
+                            strokes = strokes.dropLast(1) + listOf(currentStroke)
+                        },
+                        onDragEnd = {
+                            //strokes = strokes + listOf(currentStroke)
+                            currentStroke = emptyList()
+                        }
+                    )
+                }
+        ) {
+            // Draw all completed strokes
+            strokes.forEach { stroke ->
+                for (i in 0 until stroke.size - 1) {
+                    drawLine(
+                        color = Color.Red,
+                        start = stroke[i],
+                        end = stroke[i + 1],
+                        strokeWidth = 8f
+                    )
+                }
+            }
+        }
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .align(Alignment.BottomCenter),
+            colors = CardDefaults.cardColors (
+                containerColor = Color.Black,
+                contentColor = Color.White
+            )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Default.HorizontalRule,
+                        contentDescription = "Line Brush"
+                    )
+                }
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Default.Circle,
+                        contentDescription = "Circle Brush"
+                    )
+                }
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Default.Square,
+                        contentDescription = "Rectangle Brush"
+                    )
+                }
             }
         }
     }
