@@ -22,6 +22,10 @@ class DrawingViewModel : ViewModel() {
     var brushType by mutableStateOf(BrushType.LINE)
         private set
 
+    var pExpanded by mutableStateOf( false )
+    var cExpanded by mutableStateOf( false )
+    var sExpanded by mutableStateOf( false )
+
     private var currentStrokePoints = listOf<Offset>()  // Offset represents 1 position using an X Y coordinate
 
     fun changeColor(color: Color) {
