@@ -137,24 +137,67 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = {}) {
-                    Icon(
+                IconButton(onClick = { viewModel.changeBrushType(BrushType.LINE)}
+                    ) {
+                        Icon(
                         imageVector = Icons.Default.HorizontalRule,
                         contentDescription = "Line Brush"
-                    )
+                        )
                 }
-                IconButton(onClick = {}) {
+                IconButton(onClick = {viewModel.changeBrushType(BrushType.CIRCLE)}
+                ) {
                     Icon(
                         imageVector = Icons.Default.Circle,
                         contentDescription = "Circle Brush"
                     )
                 }
-                IconButton(onClick = {}) {
+                IconButton(onClick = {viewModel.changeBrushType(BrushType.RECTANGLE)})
+                {
                     Icon(
                         imageVector = Icons.Default.Square,
                         contentDescription = "Rectangle Brush"
                     )
                 }
+
+
+                IconButton(
+                    onClick = { viewModel.changeColor(Color.Black) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Circle,
+                        contentDescription = "Black Pen",
+                        tint = Color.DarkGray
+                    )
+                }
+                 IconButton(
+                     onClick = { viewModel.changeColor(Color.Red) }
+                        ) {
+                     Icon(
+                         imageVector = Icons.Default.Circle,
+                         contentDescription = "Red Pen",
+                         tint = Color.Red
+                     )
+                 }
+                 IconButton(
+                     onClick = { viewModel.changeColor(Color.Blue) }
+                        ) {
+                     Icon(
+                         imageVector = Icons.Default.Circle,
+                         contentDescription = "Blue Pen",
+                         tint = Color.Blue
+                     )
+                 }
+                 IconButton(
+                     onClick = { viewModel.changeColor(Color.Green) }
+                        ) {
+                    Icon(
+                        imageVector = Icons.Default.Circle,
+                        contentDescription = "Green Pen",
+                        tint = Color.Green
+                    )
+                }
+
+
             }
         }
     }
