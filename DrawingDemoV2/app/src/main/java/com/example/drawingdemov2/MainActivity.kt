@@ -1,6 +1,5 @@
 package com.example.drawingdemov2
 
-import android.graphics.Canvas
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,20 +12,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,14 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.drawingdemov2.ui.theme.DrawingDemoV2Theme
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.HorizontalRule
 import androidx.compose.material.icons.filled.Square
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,8 +44,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DrawingDemoV2Theme {
+                val drawingViewModel: DrawingViewModel = viewModel()
+                DrawingCanvasPoints(drawingViewModel)
                 //DrawCirlce()
-                DrawingCanvasPoints()
                 //DrawingCanvas(BrushType.RECTANGLE)
             }
         }
@@ -61,9 +54,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DrawingCanvasPoints() {
-    var strokes by remember { mutableStateOf(listOf<List<Offset>>()) }
-    var currentStroke by remember { mutableStateOf(listOf<Offset>()) }
+fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -74,35 +65,62 @@ fun DrawingCanvasPoints() {
                 // pointerInput and detectDragGestures.
                 .pointerInput(Unit) {
                     detectDragGestures(
+                        // Canvas detects cursor down
                         onDragStart = { offset ->
-                            currentStroke = listOf(offset)
-                            //if you update current stroke live here not on DragEnd,
-                            // then you do not need a second loop
-                            strokes = strokes + listOf(currentStroke)
+                            viewModel.startStroke(offset)
                         },
-                        onDrag = { change, x ->
+                        // Canvas detects movement
+                        onDrag = { change, _ ->
                             change.consume()
-                            currentStroke = currentStroke + change.position
-                            //if you update current stroke live here not on DragEnd,
-                            // then you do not need a second loop
-                            strokes = strokes.dropLast(1) + listOf(currentStroke)
+                            viewModel.addPoint(change.position)
                         },
+                        // Canvas detects cursor up
                         onDragEnd = {
-                            //strokes = strokes + listOf(currentStroke)
-                            currentStroke = emptyList()
+                            viewModel.endStroke()
                         }
                     )
                 }
         ) {
             // Draw all completed strokes
-            strokes.forEach { stroke ->
-                for (i in 0 until stroke.size - 1) {
-                    drawLine(
-                        color = Color.Red,
-                        start = stroke[i],
-                        end = stroke[i + 1],
-                        strokeWidth = 8f
-                    )
+            viewModel.strokes.forEach { stroke ->
+                when (stroke.brushType) {
+
+                    BrushType.LINE -> {
+                        for (i in 0 until stroke.points.size - 1) {
+                            drawLine(
+                                color = stroke.color,
+                                start = stroke.points[i],
+                                end = stroke.points[i + 1],
+                                strokeWidth = stroke.size
+                            )
+                        }
+                    }
+
+                    BrushType.CIRCLE -> {
+                        stroke.points.forEach { point ->
+                            drawCircle(
+                                color = stroke.color,
+                                radius = stroke.size,
+                                center = point
+                            )
+                        }
+                    }
+
+                    BrushType.RECTANGLE -> {
+                        stroke.points.forEach { point ->
+                            drawRect(
+                                color = stroke.color,
+                                topLeft = Offset(
+                                    point.x - stroke.size,
+                                    point.y - stroke.size
+                                ),
+                                size = Size(
+                                    stroke.size * 2,
+                                    stroke.size * 2
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
