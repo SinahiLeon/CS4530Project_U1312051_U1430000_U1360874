@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -20,6 +21,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,8 +36,10 @@ import androidx.compose.ui.unit.dp
 import com.example.drawingdemov2.ui.theme.DrawingDemoV2Theme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HorizontalRule
 import androidx.compose.material.icons.filled.Square
+import androidx.compose.material3.OutlinedIconButton
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
@@ -55,6 +59,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
+    var pExpanded by remember { mutableStateOf(false) }
+    var cExpanded by remember { mutableStateOf(false) }
+    var sExpanded by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -137,36 +144,71 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = { viewModel.changeBrushType(BrushType.LINE)}
-                    ) {
+                Box() {
+                    IconButton(onClick = { pExpanded = true }) {
                         Icon(
-                        imageVector = Icons.Default.HorizontalRule,
-                        contentDescription = "Line Brush"
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Open Pen menu"
                         )
-                }
-                IconButton(onClick = {viewModel.changeBrushType(BrushType.CIRCLE)}
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Circle,
-                        contentDescription = "Circle Brush"
-                    )
-                }
-                IconButton(onClick = {viewModel.changeBrushType(BrushType.RECTANGLE)})
-                {
-                    Icon(
-                        imageVector = Icons.Default.Square,
-                        contentDescription = "Rectangle Brush"
-                    )
+                    }
+                    DropdownMenu(
+                        expanded = pExpanded,
+                        onDismissRequest = {pExpanded = false}
+                    ) {
+                        Column() {
+                            OutlinedIconButton(
+                                onClick = { pExpanded = false; viewModel.changeBrushType(BrushType.LINE)},
+                                border = if (viewModel.brushType == BrushType.LINE) {
+                                    BorderStroke(width = 2.dp, color = Color.White)
+                                } else {
+                                    null;
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.HorizontalRule,
+                                    contentDescription = "Line Brush"
+                                )
+                            }
+                            OutlinedIconButton(
+                                onClick = { pExpanded = false; viewModel.changeBrushType(BrushType.CIRCLE)},
+                                border = if (viewModel.brushType == BrushType.CIRCLE) {
+                                    BorderStroke(width = 2.dp, color = Color.White)
+                                } else {
+                                    null;
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Circle,
+                                    contentDescription = "Circle Brush"
+                                )
+                            }
+                            OutlinedIconButton(
+                                onClick = { pExpanded = false; viewModel.changeBrushType(BrushType.RECTANGLE)},
+                                border = if (viewModel.brushType == BrushType.RECTANGLE) {
+                                    BorderStroke(width = 2.dp, color = Color.White)
+                                } else {
+                                    null;
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Square,
+                                    contentDescription = "Rectangle Brush"
+                                )
+                            }
+                        }
+                    }
                 }
 
 
-                IconButton(
-                    onClick = { viewModel.changeColor(Color.Black) }
+
+                OutlinedIconButton(
+                    onClick = { viewModel.changeColor(Color.Black) },
+                    border = BorderStroke(2.dp, Color.White)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Circle,
                         contentDescription = "Black Pen",
-                        tint = Color.DarkGray
+                        tint = Color.Black
                     )
                 }
                  IconButton(
