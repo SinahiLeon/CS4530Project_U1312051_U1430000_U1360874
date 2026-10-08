@@ -25,7 +25,7 @@ class DrawingUnitTest {
     }
 
     @Test
-    fun viewModel_initializedState() {
+    fun testInitializedState() {
         val strokes by mutableStateOf(listOf<Stroke>())
 
         assertEquals(strokes, viewModel.strokes)
@@ -38,7 +38,7 @@ class DrawingUnitTest {
     }
 
     @Test
-    fun viewModel_changeColor_colorIsPurple(){
+    fun testChangeColor_colorIsPurple(){
         assertEquals(Color.Black, viewModel.selectedColor)
 
         viewModel.changeColor(Color(0xFFA500FF))
@@ -47,7 +47,7 @@ class DrawingUnitTest {
     }
 
     @Test
-    fun viewModel_changePenSize_sizeIs20(){
+    fun testChangePenSize_sizeIs20(){
         assertEquals(8f, viewModel.penSize)
 
         viewModel.changePenSize(20f)
@@ -56,7 +56,7 @@ class DrawingUnitTest {
     }
 
     @Test
-    fun viewModel_startStroke_addsSinglePoint(){
+    fun testStartStroke_addsSinglePoint(){
         viewModel.startStroke(Offset(10f, 10f))
 
         assertEquals(1, viewModel.strokes.size)
@@ -66,7 +66,7 @@ class DrawingUnitTest {
     }
 
     @Test
-    fun viewModel_addPoint_addsMultiplePoints(){
+    fun testAddPoint_addsMultiplePoints(){
         val point1 = Offset(10f, 10f)
         val point2 = Offset(20f, 20f)
         val point3 = Offset(30f, 30f)
@@ -82,7 +82,7 @@ class DrawingUnitTest {
     }
 
     @Test
-    fun viewModel_endStroke_clearsCurrentStroke(){
+    fun testEndStroke_clearsCurrentStroke(){
         val point1 = Offset(10f, 10f)
         val point2 = Offset(20f, 20f)
         viewModel.startStroke(point1)

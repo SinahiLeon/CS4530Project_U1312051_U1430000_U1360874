@@ -51,6 +51,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,7 +160,7 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
                     IconButton(onClick = { viewModel.pExpanded = true }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Open Pen menu",
+                            contentDescription = "Open pen menu",
                             Modifier.size(48.dp)
                         )
                     }
@@ -168,9 +169,9 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
                         onDismissRequest = {viewModel.pExpanded = false}
                     ) {
                         Column() {
-                            PenButton(viewModel, BrushType.LINE)
-                            PenButton(viewModel, BrushType.CIRCLE)
-                            PenButton(viewModel, BrushType.RECTANGLE)
+                            PenButton(viewModel, BrushType.LINE, "Line")
+                            PenButton(viewModel, BrushType.CIRCLE, "Circle")
+                            PenButton(viewModel, BrushType.RECTANGLE, "Rectangle")
                         }
                     }
                 }
@@ -181,7 +182,7 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.Circle,
-                            contentDescription = "Black Pen",
+                            contentDescription = "Black pen",
                             tint = viewModel.selectedColor,
                             modifier = if(viewModel.selectedColor == Color.Black) {
                                 Modifier.border(width = 2.dp, color = Color.White, CircleShape)
@@ -198,24 +199,24 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
                     ) {
                         Column() {
                             Row() {
-                                ColorButton(viewModel, Color.Magenta)
-                                ColorButton(viewModel, Color.Green)
-                                ColorButton(viewModel, Color.White)
+                                ColorButton(viewModel, Color.Magenta, "Magenta")
+                                ColorButton(viewModel, Color.Green, "Green")
+                                ColorButton(viewModel, Color.White, "White")
                             }
                             Row() {
-                                ColorButton(viewModel, Color.Red)
-                                ColorButton(viewModel, Color.Cyan)
-                                ColorButton(viewModel, Color.LightGray)
+                                ColorButton(viewModel, Color.Red, "Red")
+                                ColorButton(viewModel, Color.Cyan, "Cyan")
+                                ColorButton(viewModel, Color.LightGray, "LightGray")
                             }
                             Row() {
-                                ColorButton(viewModel, Color(0xFFFFA500)) //Orange
-                                ColorButton(viewModel, Color.Blue)
-                                ColorButton(viewModel, Color.Gray)
+                                ColorButton(viewModel, Color(0xFFFFA500), "Orange") //Orange
+                                ColorButton(viewModel, Color.Blue, "Blue")
+                                ColorButton(viewModel, Color.Gray, "Gray")
                             }
                             Row() {
-                                ColorButton(viewModel, Color.Yellow)
-                                ColorButton(viewModel, Color(0xFFA500FF)) //Purple
-                                ColorButton(viewModel, Color.Black)
+                                ColorButton(viewModel, Color.Yellow, "Yellow")
+                                ColorButton(viewModel, Color(0xFFA500FF), "Purple") //Purple
+                                ColorButton(viewModel, Color.Black, "Black")
                             }
                         }
                     }
@@ -226,7 +227,7 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
                     ) {
                         Icon(
                             imageVector = MaterialSymbolsArrowsOutput,
-                            contentDescription = "Placeholder",
+                            contentDescription = "Open size menu",
                             tint = Color.White,
                             modifier = Modifier.size(48.dp)
                         )
@@ -238,7 +239,7 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 imageVector = Icons.Default.Circle,
-                                contentDescription = "Larger",
+                                contentDescription = "Larger top",
                                 tint = Color.White,
                                 modifier = Modifier.size(48.dp)
                             )
@@ -249,11 +250,12 @@ fun DrawingCanvasPoints(viewModel: DrawingViewModel) {
                                 modifier = Modifier.graphicsLayer( {rotationZ = 270f})
                                     .width(120.dp)
                                     .height(36.dp)
+                                    .testTag("Slider")
                             )
                             Spacer(modifier = Modifier.height(50.dp))
                             Icon(
                                 imageVector = Icons.Default.Circle,
-                                contentDescription = "Larger",
+                                contentDescription = "Larger bottom",
                                 tint = Color.White,
                                 modifier = Modifier.size(8.dp)
                             )
@@ -270,7 +272,7 @@ enum class BrushType {
 }
 
 @Composable
-fun PenButton(viewModel: DrawingViewModel, brushType: BrushType) {
+fun PenButton(viewModel: DrawingViewModel, brushType: BrushType, brushName: String) {
     OutlinedIconButton(
         onClick = { viewModel.pExpanded = false; viewModel.changeBrushType(brushType)},
         border = if (viewModel.brushType == brushType) {
@@ -283,13 +285,13 @@ fun PenButton(viewModel: DrawingViewModel, brushType: BrushType) {
             imageVector = if (brushType == BrushType.LINE) { Icons.Default.HorizontalRule }
             else if (brushType == BrushType.CIRCLE) { Icons.Default.Circle }
             else { Icons.Default.Square },
-            contentDescription = "$brushType button"
+            contentDescription = "$brushName button"
         )
     }
 }
 
 @Composable
-fun ColorButton(viewModel: DrawingViewModel, color: Color) {
+fun ColorButton(viewModel: DrawingViewModel, color: Color, colorName: String) {
     OutlinedIconButton(
         onClick = {
             viewModel.cExpanded = false
@@ -303,7 +305,7 @@ fun ColorButton(viewModel: DrawingViewModel, color: Color) {
     ) {
         Icon(
             imageVector = Icons.Default.Circle,
-            contentDescription = "$color button",
+            contentDescription = "$colorName button",
             tint = color,
             modifier = if(color == Color.Black) {
                 Modifier.border(width = 2.dp, color = Color.White, CircleShape)
