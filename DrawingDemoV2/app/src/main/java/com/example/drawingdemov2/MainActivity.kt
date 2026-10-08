@@ -365,14 +365,14 @@ fun DrawingCanvas(brushType: BrushType = BrushType.CIRCLE) {
     }
 }
 
-@Composable
-fun DrawCirlce() {
-    Column (Modifier.fillMaxWidth().statusBarsPadding()) {
-        Canvas(Modifier.size(100.dp)) {
-            drawCircle(
-                color = Color.Blue,
-                radius = size.minDimension / 2
-            )
-        }
-    }
-}
+//@Composable
+//fun DrawCirlce() {
+//    Column (Modifier.fillMaxWidth().statusBarsPadding()) {
+//        Canvas(Modifier.size(100.dp)) {
+//            drawCircle(
+//                color = Color.Blue,
+//                radius = size.minDimension / 2
+//            )
+//        }
+//    }
+//}

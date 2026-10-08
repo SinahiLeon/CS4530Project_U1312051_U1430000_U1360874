@@ -67,4 +67,7 @@ class DrawingViewModel : ViewModel() {
         currentStrokePoints = emptyList()  // actively drawing nothing
     }
 
+    fun getPointCount(): Int {
+        return currentStrokePoints.size
+    }
 }
