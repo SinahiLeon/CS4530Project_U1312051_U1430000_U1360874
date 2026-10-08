@@ -1,8 +1,7 @@
-package com.example.drawingdemov2
+package com.example.klspaint
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -31,11 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -49,7 +43,6 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun CanvasScreen(viewModel: DrawingViewModel, myNavController : NavHostController) {
-    var sliderValue by remember { mutableFloatStateOf(0.5f) }
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -295,65 +288,3 @@ fun ColorButton(viewModel: DrawingViewModel, color: Color, colorName: String) {
         )
     }
 }
-
-@Composable
-fun DrawingCanvas(brushType: BrushType = BrushType.CIRCLE) {
-    var strokes by remember { mutableStateOf(listOf<List<Offset>>()) }
-    var currentStroke by remember { mutableStateOf<List<Offset>>(emptyList()) }
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        currentStroke = listOf(offset)
-                        strokes = strokes + listOf(currentStroke)
-                    },
-                    onDrag = { change, _ ->
-                        change.consume()
-                        currentStroke = currentStroke + change.position
-                        strokes = strokes.dropLast(1) + listOf(currentStroke)
-                    },
-                    onDragEnd = { currentStroke = emptyList() }
-                )
-            }
-    ) {
-        strokes.forEach { stroke ->
-            when (brushType) {
-                BrushType.LINE -> {
-                    for (i in 0 until stroke.size - 1) {
-                        drawLine(Color.Black, stroke[i], stroke[i + 1], strokeWidth = 4f)
-                    }
-                }
-                BrushType.CIRCLE -> {
-                    stroke.forEach { point ->
-                        drawCircle(Color.Red, radius = 15f, center = point)
-                    }
-                }
-                BrushType.RECTANGLE -> {
-                    stroke.forEach { point ->
-                        drawRect(
-                            Color.Black,
-                            topLeft = Offset(point.x - 8f, point.y - 8f),
-                            size = Size(30f, 30f)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-//@Composable
-//fun DrawCirlce() {
-//    Column (Modifier.fillMaxWidth().statusBarsPadding()) {
-//        Canvas(Modifier.size(100.dp)) {
-//            drawCircle(
-//                color = Color.Blue,
-//                radius = size.minDimension / 2
-//            )
-//        }
-//    }
-//}

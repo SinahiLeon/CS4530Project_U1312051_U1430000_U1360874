@@ -1,4 +1,4 @@
-package com.example.drawingdemov2
+package com.example.klspaint
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue

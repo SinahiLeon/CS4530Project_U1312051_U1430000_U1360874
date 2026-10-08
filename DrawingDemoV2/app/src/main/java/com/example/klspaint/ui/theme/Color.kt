@@ -1,4 +1,4 @@
-package com.example.drawingdemov2.ui.theme
+package com.example.klspaint.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

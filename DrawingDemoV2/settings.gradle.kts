@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DrawingDemoV2"
+rootProject.name = "KLSPaint"
 include(":app")

@@ -1,4 +1,4 @@
-package com.example.drawingdemov2
+package com.example.klspaint
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel

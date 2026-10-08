@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.drawingdemov2"
+    namespace = "com.example.klspaint"
     compileSdk {
         version = release(37)
     }

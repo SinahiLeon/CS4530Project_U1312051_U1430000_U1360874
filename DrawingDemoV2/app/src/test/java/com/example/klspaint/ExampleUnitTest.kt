@@ -1,8 +1,7 @@
-package com.example.drawingdemov2
+package com.example.klspaint
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import org.junit.Test
