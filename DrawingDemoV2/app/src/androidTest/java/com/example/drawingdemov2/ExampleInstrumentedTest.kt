@@ -75,7 +75,7 @@ class DrawingInstrumentedTest {
     @Test
     fun testColorMenu_opensColorPicker() {
         composeTestRule
-            .onNodeWithContentDescription("Black Pen")
+            .onNodeWithContentDescription("Open color menu")
             .performClick()
 
         composeTestRule
@@ -123,7 +123,7 @@ class DrawingInstrumentedTest {
         val viewModel = androidx.lifecycle.ViewModelProvider(activity)[DrawingViewModel::class.java]
 
         composeTestRule
-            .onNodeWithContentDescription("Black pen")
+            .onNodeWithContentDescription("Open color menu")
             .performClick()
 
         composeTestRule
@@ -171,7 +171,7 @@ class DrawingInstrumentedTest {
     }
 
     @Test
-    fun testALlMenus_changeAllPenSettings() {
+    fun testAllMenus_changeAllPenSettings() {
         // get the viewModel from the emulator
         val activity = composeTestRule.activity
         val viewModel = androidx.lifecycle.ViewModelProvider(activity)[DrawingViewModel::class.java]
@@ -194,7 +194,7 @@ class DrawingInstrumentedTest {
         }
 
         composeTestRule
-            .onNodeWithContentDescription("Black pen")
+            .onNodeWithContentDescription("Open color menu")
             .performClick()
         composeTestRule
             .onNodeWithContentDescription("Purple button")
@@ -208,6 +208,5 @@ class DrawingInstrumentedTest {
 
 }
 
-// Test Buttons
-// Test Stroke properties stored in view model
+// Test various stroke properties stored in view model
 // Test that when canvas is clicked, point added
