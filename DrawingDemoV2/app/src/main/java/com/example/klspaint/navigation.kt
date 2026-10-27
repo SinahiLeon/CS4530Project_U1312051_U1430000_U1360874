@@ -9,9 +9,9 @@ import androidx.navigation.compose.composable
 @Composable
 fun MyAppNav (myNavController: NavHostController, startDestination: String){
 
-    val drawingViewModel: DrawingViewModel = viewModel()
+    val KLSViewModel: KLSViewModel = viewModel()
 
     NavHost(myNavController, startDestination){
         composable ("splash") { SplashScreen(myNavController) }
-        composable("canvas") { CanvasScreen(drawingViewModel, myNavController) }}
+        composable("canvas") { CanvasScreen(KLSViewModel, myNavController) }}
 }

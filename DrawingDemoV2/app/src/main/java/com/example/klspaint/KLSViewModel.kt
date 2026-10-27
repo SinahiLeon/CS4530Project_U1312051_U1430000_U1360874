@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset  // Represents an (x,y) position on the canvas
 
-class DrawingViewModel : ViewModel() {
+class KLSViewModel : ViewModel() {
     // strokes = holds all strokes in drawing. Canvas will redraw
     // itself as it observes strokes change
     var strokes by mutableStateOf(listOf<Stroke>())

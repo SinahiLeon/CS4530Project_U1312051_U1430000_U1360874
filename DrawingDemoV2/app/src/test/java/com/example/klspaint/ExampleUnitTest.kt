@@ -16,11 +16,11 @@ import org.junit.Before
  */
 class DrawingUnitTest {
 
-    private lateinit var viewModel: DrawingViewModel
+    private lateinit var viewModel: KLSViewModel
 
     @Before
     fun setup(){
-        viewModel = DrawingViewModel()
+        viewModel = KLSViewModel()
     }
 
     @Test

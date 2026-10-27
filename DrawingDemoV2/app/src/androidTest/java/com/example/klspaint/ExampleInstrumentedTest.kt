@@ -56,7 +56,7 @@ class DrawingInstrumentedTest {
     fun testPenMenu_changePen() {
         // get the viewModel from the emulator
         val activity = composeTestRule.activity
-        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[DrawingViewModel::class.java]
+        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[KLSViewModel::class.java]
 
         composeTestRule
             .onNodeWithContentDescription("Open pen menu")
@@ -118,7 +118,7 @@ class DrawingInstrumentedTest {
     fun testColorMenu_changeColor() {
         // get the viewModel from the emulator
         val activity = composeTestRule.activity
-        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[DrawingViewModel::class.java]
+        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[KLSViewModel::class.java]
 
         composeTestRule
             .onNodeWithContentDescription("Open color menu")
@@ -153,7 +153,7 @@ class DrawingInstrumentedTest {
     fun testSizeMenu_changeSize() {
         // get the viewModel from the emulator
         val activity = composeTestRule.activity
-        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[DrawingViewModel::class.java]
+        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[KLSViewModel::class.java]
 
         composeTestRule
             .onNodeWithContentDescription("Open size menu")
@@ -172,7 +172,7 @@ class DrawingInstrumentedTest {
     fun testAllMenus_changeAllPenSettings() {
         // get the viewModel from the emulator
         val activity = composeTestRule.activity
-        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[DrawingViewModel::class.java]
+        val viewModel = androidx.lifecycle.ViewModelProvider(activity)[KLSViewModel::class.java]
 
         composeTestRule
             .onNodeWithContentDescription("Open pen menu")

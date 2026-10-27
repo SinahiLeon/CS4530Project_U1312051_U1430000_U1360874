@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
 @Composable
-fun CanvasScreen(viewModel: DrawingViewModel, myNavController : NavHostController) {
+fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -244,7 +244,7 @@ enum class BrushType {
 }
 
 @Composable
-fun PenButton(viewModel: DrawingViewModel, brushType: BrushType, brushName: String) {
+fun PenButton(viewModel: KLSViewModel, brushType: BrushType, brushName: String) {
     OutlinedIconButton(
         onClick = { viewModel.pExpanded = false; viewModel.changeBrushType(brushType)},
         border = if (viewModel.brushType == brushType) {
@@ -263,7 +263,7 @@ fun PenButton(viewModel: DrawingViewModel, brushType: BrushType, brushName: Stri
 }
 
 @Composable
-fun ColorButton(viewModel: DrawingViewModel, color: Color, colorName: String) {
+fun ColorButton(viewModel: KLSViewModel, color: Color, colorName: String) {
     OutlinedIconButton(
         onClick = {
             viewModel.cExpanded = false
