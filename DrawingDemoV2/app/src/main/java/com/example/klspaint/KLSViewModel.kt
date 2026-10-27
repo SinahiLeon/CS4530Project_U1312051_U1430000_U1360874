@@ -5,10 +5,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset  // Represents an (x,y) position on the canvas
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 
-class KLSViewModel : ViewModel() {
+class KLSViewModel(private val repository: KLSRepository) : ViewModel() {
     // strokes = holds all strokes in drawing. Canvas will redraw
     // itself as it observes strokes change
+    val allDrawings: StateFlow<List<KLSDrawing?>> =
+        repository.allDrawings.stateIn(
+            scope = repository.scope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = listOf()
+        )
     var strokes by mutableStateOf(listOf<Stroke>())
         private set
 
@@ -70,5 +79,17 @@ class KLSViewModel : ViewModel() {
     // Helper method for testing size of currentStrokePoints
     fun getPointCount(): Int {
         return currentStrokePoints.size
+    }
+
+    fun saveDrawing() {
+        repository.addDrawing(KLSDrawing(strokes))
+    }
+
+    fun deleteDrawing(drawing : KLSDrawing) {
+        repository.deleteDrawing(drawing)
+    }
+
+    fun getDrawing(drawing: KLSDrawing) {
+        repository.getDrawing(drawing)
     }
 }
