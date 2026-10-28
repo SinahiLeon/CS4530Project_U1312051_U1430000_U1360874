@@ -1,17 +1,33 @@
 package com.example.klspaint
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset  // Represents an (x,y) position on the canvas
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.io.ByteArrayOutputStream
 
 class KLSViewModel(private val repository: KLSRepository) : ViewModel() {
     // strokes = holds all strokes in drawing. Canvas will redraw
     // itself as it observes strokes change
+
+    private val _drawing = MutableStateFlow(KLSDrawing(byteArrayOf()))
+    val drawing: Flow<Bitmap> = _drawing.map { BitmapFactory.decodeByteArray(it.imageBytes, 0,it.imageBytes.size)}
+
     val allDrawings: StateFlow<List<KLSDrawing?>> =
         repository.allDrawings.stateIn(
             scope = repository.scope,
@@ -82,14 +98,23 @@ class KLSViewModel(private val repository: KLSRepository) : ViewModel() {
     }
 
     fun saveDrawing() {
-        repository.addDrawing(KLSDrawing(strokes))
+        val stream = ByteArrayOutputStream()
+        drawing.collectAsState().compress(Bitmap.CompressFormat.PNG, 90, stream)
+        repository.addDrawing(KLSDrawing()))
     }
 
     fun deleteDrawing(drawing : KLSDrawing) {
         repository.deleteDrawing(drawing)
     }
+}
 
-    fun getDrawing(drawing: KLSDrawing) {
-        repository.getDrawing(drawing)
+object KLSViewModelProvider {
+    val Factory = viewModelFactory {
+        initializer {
+            KLSViewModel(
+                (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
+                        as KLSApplication).klsRepository
+            )
+        }
     }
 }

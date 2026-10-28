@@ -23,7 +23,4 @@ interface KLSDAO {
 
     @Query("SELECT * from KLSDrawing")
     fun allDrawings() : Flow<List<KLSDrawing>>
-
-    @Query("SELECT * from KLSDrawing")
-    fun getDrawing(data: KLSDrawing) : Flow<KLSDrawing>
 }

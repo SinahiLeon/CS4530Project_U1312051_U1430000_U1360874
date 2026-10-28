@@ -1,6 +1,8 @@
 package com.example.klspaint
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class KLSRepository(val scope: CoroutineScope, private val dao: KLSDAO) {
@@ -16,12 +18,6 @@ class KLSRepository(val scope: CoroutineScope, private val dao: KLSDAO) {
     fun deleteDrawing(klsDrawing: KLSDrawing){
         scope.launch {
             dao.deleteDrawing(klsDrawing)
-        }
-    }
-
-    fun getDrawing(klsDrawing: KLSDrawing){
-        scope.launch {
-            dao.getDrawing(klsDrawing)
         }
     }
 }
