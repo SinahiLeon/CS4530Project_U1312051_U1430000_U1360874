@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
@@ -69,47 +70,12 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController) {
                     )
                 }
         ) {
-            // Draw all completed strokes
-            viewModel.strokes.forEach { stroke ->
-                when (stroke.brushType) {
-
-                    BrushType.LINE -> {
-                        for (i in 0 until stroke.points.size - 1) {
-                            drawLine(
-                                color = stroke.color,
-                                start = stroke.points[i],
-                                end = stroke.points[i + 1],
-                                strokeWidth = stroke.size
-                            )
-                        }
-                    }
-
-                    BrushType.CIRCLE -> {
-                        stroke.points.forEach { point ->
-                            drawCircle(
-                                color = stroke.color,
-                                radius = stroke.size,
-                                center = point
-                            )
-                        }
-                    }
-
-                    BrushType.RECTANGLE -> {
-                        stroke.points.forEach { point ->
-                            drawRect(
-                                color = stroke.color,
-                                topLeft = Offset(
-                                    point.x - stroke.size,
-                                    point.y - stroke.size
-                                ),
-                                size = Size(
-                                    stroke.size * 2,
-                                    stroke.size * 2
-                                )
-                            )
-                        }
-                    }
-                }
+            // Draw the image
+            viewModel.image?.let { it ->
+                drawImage(
+                    image = it.asImageBitmap(),
+                    dstSize = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt())
+                )
             }
         }
         Card(

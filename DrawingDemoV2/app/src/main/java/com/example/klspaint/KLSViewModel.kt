@@ -1,32 +1,43 @@
 package com.example.klspaint
+import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.BitmapFactory
-import androidx.compose.runtime.collectAsState
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset  // Represents an (x,y) position on the canvas
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import java.io.ByteArrayOutputStream
+import androidx.core.graphics.createBitmap
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.apply
 
-class KLSViewModel(private val repository: KLSRepository) : ViewModel() {
+class KLSViewModel(
+    private val repository: KLSRepository,
+    private val appContext: Context
+) : ViewModel() {
     // strokes = holds all strokes in drawing. Canvas will redraw
     // itself as it observes strokes change
-
-    private val _drawing = MutableStateFlow(KLSDrawing(byteArrayOf()))
-    val drawing: Flow<Bitmap> = _drawing.map { BitmapFactory.decodeByteArray(it.imageBytes, 0,it.imageBytes.size)}
 
     val allDrawings: StateFlow<List<KLSDrawing?>> =
         repository.allDrawings.stateIn(
@@ -34,10 +45,20 @@ class KLSViewModel(private val repository: KLSRepository) : ViewModel() {
             started = SharingStarted.WhileSubscribed(),
             initialValue = listOf()
         )
-    var strokes by mutableStateOf(listOf<Stroke>())
+
+    private var currentDrawing: KLSDrawing = KLSDrawing("")
+    var image by mutableStateOf<Bitmap?>(null)
         private set
 
-    // set default pen color to black
+    private var selectedPaint = Paint().apply {
+        isAntiAlias = true
+        style = Paint.Style.FILL_AND_STROKE
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+        color = Color.Black.toArgb()
+        strokeWidth = 8f
+    }
+
     var selectedColor by mutableStateOf(Color.Black)
         private set
 
@@ -47,74 +68,150 @@ class KLSViewModel(private val repository: KLSRepository) : ViewModel() {
     var brushType by mutableStateOf(BrushType.LINE)
         private set
 
+    private var canvas: Canvas? = null
     var pExpanded by mutableStateOf( false )
     var cExpanded by mutableStateOf( false )
     var sExpanded by mutableStateOf( false )
 
-    private var currentStrokePoints = listOf<Offset>()  // Offset represents 1 position using an X Y coordinate
+    private var lastOffset: Offset? = null // Offset represents 1 position using an X Y coordinate
 
     fun changeColor(color: Color) {
         selectedColor = color
+        selectedPaint.color = color.toArgb()
     }
 
     fun changePenSize(size: Float) {
         penSize = size
+        selectedPaint.strokeWidth = size
     }
 
     fun changeBrushType(type: BrushType) {
         brushType = type
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun createNewDrawing(width: Int = 1080, height: Int = 1920) {
+        val bitmap = createBitmap(width, height)
+        val thisCanvas = Canvas(bitmap)
+        thisCanvas.drawColor(0xFFFFFFFF)
+
+        image = bitmap
+        canvas = thisCanvas
+        currentDrawing = KLSDrawing(genFilePath())
+    }
+
     // When the cursor first touches the screen, this function receives the loc of that cursor
     fun startStroke(offset: Offset) {
-        currentStrokePoints = listOf(offset)    // begin current stroke
-
-        val newStroke = Stroke(     // creates a stroke object
-            points = currentStrokePoints,   // where it was drawn
-            color = selectedColor,
-            size = penSize,
-            brushType = brushType       // what shape
-        )
-        strokes = strokes + newStroke   // takes all existing strokes and adds this new one
+        lastOffset = offset
+        addPoint(offset)
         }
 
     // Receives the newest (x,y) position as the user's finger moves
     fun addPoint(offset: Offset) {
-        currentStrokePoints = currentStrokePoints + offset  // Adds newest finger position to current stroke's list
-
-        val updatedStroke = strokes.last().copy(    // gets most recently created Stroke and creates copy of it
-            points = currentStrokePoints    // Points change as you are drawing, so we update it to the last saved points
-        )
-        strokes = strokes.dropLast(1) + updatedStroke
+        val thisCanvas = canvas?: return
+        val half = penSize / 2
+        when (brushType) {
+            BrushType.LINE -> {
+                val temp = lastOffset
+                if(temp != null) {
+                    thisCanvas.drawLine(temp.x, temp.y,
+                        offset.x, offset.y,
+                        selectedPaint
+                    )
+                }
+            }
+            BrushType.CIRCLE -> {
+                thisCanvas.drawCircle(offset.x, offset.y, half, selectedPaint)
+            }
+            BrushType.RECTANGLE -> {
+                thisCanvas.drawRect(offset.x - half, offset.y - half,
+                    offset.x + half, offset.y + half, selectedPaint)
+            }
+        }
     }
 
     fun endStroke() {
-        currentStrokePoints = emptyList()  // actively drawing nothing
+        lastOffset = null
     }
 
-    // Helper method for testing size of currentStrokePoints
-    fun getPointCount(): Int {
-        return currentStrokePoints.size
+    private fun genFilePath(): String {
+        val file = File(appContext.filesDir, "img_${System.currentTimeMillis()}.png")
+        return file.absolutePath
     }
 
     fun saveDrawing() {
-        val stream = ByteArrayOutputStream()
-        drawing.collectAsState().compress(Bitmap.CompressFormat.PNG, 90, stream)
-        repository.addDrawing(KLSDrawing()))
+        val bitmap = image?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val file = File(currentDrawing.imagePath)
+            FileOutputStream(file).use {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            }
+
+            repository.addDrawing(KLSDrawing(file.absolutePath))
+        }
+    }
+
+    fun loadDrawing(drawing: KLSDrawing) {
+        viewModelScope.launch(Dispatchers.IO) {
+            currentDrawing = drawing
+            val file = File(drawing.imagePath)
+            if (file.exists()) {
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath).copy(Bitmap.Config.ARGB_8888, true)
+                bitmap.let {
+                    withContext(Dispatchers.Main) {
+                        image = it
+                        canvas = Canvas(it)
+                    }
+                }
+            }
+        }
     }
 
     fun deleteDrawing(drawing : KLSDrawing) {
+        File(drawing.imagePath).delete()
         repository.deleteDrawing(drawing)
+    }
+
+    fun importImage(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val inputStream = appContext.contentResolver.openInputStream(uri)
+            val decodedBitmap = BitmapFactory.decodeStream(inputStream)?.copy(Bitmap.Config.ARGB_8888, true)
+            inputStream?.close()
+            currentDrawing = KLSDrawing(genFilePath())
+
+            decodedBitmap?.let { bitmap ->
+                withContext(Dispatchers.Main) {
+                    image = bitmap
+                    canvas = Canvas(bitmap)
+                }
+            }
+        }
+    }
+
+    fun exportImage(fileName: String) {
+        val bitmap = image?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val content = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/KLSPaint")
+            }
+
+            val imageUri = appContext.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, content)
+            imageUri?.let {
+                appContext.contentResolver.openOutputStream(it).use {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it!!)
+                }
+            }
+        }
     }
 }
 
 object KLSViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            KLSViewModel(
-                (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
-                        as KLSApplication).klsRepository
-            )
+            val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KLSApplication
+            KLSViewModel( app.klsRepository, app)
         }
     }
 }
