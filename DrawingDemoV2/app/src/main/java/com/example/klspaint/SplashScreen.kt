@@ -40,7 +40,11 @@ fun SplashScreen(myNavController : NavHostController) {
                 }))
         // Customize the delay time
         delay(2400L.milliseconds)
-        myNavController.navigate("canvas")
+        myNavController.navigate("main") {  //takes user to saved drawings
+            popUpTo("splash") { // removes splash screen from nav history
+                inclusive = true    // ensures that back button wont go back to splash screen
+            }
+        }
     }
 
     // Logo
