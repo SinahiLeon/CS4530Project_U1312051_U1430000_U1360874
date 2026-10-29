@@ -14,6 +14,6 @@ fun MyAppNav (myNavController: NavHostController, startDestination: String){
     NavHost(myNavController, startDestination) {
         composable("splash") { SplashScreen(myNavController) }
         composable("canvas") { CanvasScreen(klsViewModel, myNavController) }
-        composable("main") { MainWindow(klsViewModel) }
+        composable("main") { MainWindow(klsViewModel, myNavController) }
     }
 }

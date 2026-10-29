@@ -1,17 +1,35 @@
 package com.example.klspaint
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.Text
+import androidx.navigation.NavHostController
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 
 @Composable
-fun MainWindow(klsViewModel : KLSViewModel) {   //means MainWindow receives same ViewModel used by drawing screen
-    val drawings by klsViewModel.allDrawings.collectAsState()   //observes State Flow and converts into Compose state
-    Column{
-         Text("My Drawings")
-         Text("Saved Drawings: ${drawings.size}")
-    }
+fun MainWindow(
+    klsViewModel: KLSViewModel,
+    myNavController: NavHostController
+) {
+    Column(
+        modifier = Modifier.padding(20.dp)
+    ) {
+        Text("My Drawings")
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(onClick = {
+            klsViewModel.createNewDrawing()
+            myNavController.navigate("canvas")
+        }) {
+            Text("New Drawing")
+        }
+    }
 }

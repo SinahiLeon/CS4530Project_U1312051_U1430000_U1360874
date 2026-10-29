@@ -93,8 +93,7 @@ class KLSViewModel(
     fun createNewDrawing(width: Int = 1080, height: Int = 1920) {
         val bitmap = createBitmap(width, height)
         val thisCanvas = Canvas(bitmap)
-        thisCanvas.drawColor(0xFFFFFFFF)
-
+        thisCanvas.drawColor(android.graphics.Color.WHITE)
         image = bitmap
         canvas = thisCanvas
         currentDrawing = KLSDrawing(genFilePath())
