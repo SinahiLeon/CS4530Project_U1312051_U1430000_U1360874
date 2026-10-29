@@ -1,5 +1,6 @@
 package com.example.klspaint
 
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
@@ -15,23 +16,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HorizontalRule
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +39,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,7 +51,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,8 +59,7 @@ import com.example.klspaint.ui.theme.onBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
-{
+fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
     var redraw by remember { mutableStateOf(0) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var drawingNameInput by remember { mutableStateOf("") }
@@ -95,7 +87,8 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back to home",
-                            tint = onBackground
+                            tint = onBackground,
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 },
@@ -107,7 +100,8 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                         Icon(
                             imageVector = Icons.Default.Download,
                             contentDescription = "Save drawing",
-                            tint = onBackground
+                            tint = onBackground,
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 },
@@ -124,7 +118,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Box() { //Pen shape
+                    Box { //Pen shape
                         IconButton(onClick = { viewModel.pExpanded = true }) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
@@ -135,9 +129,9 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                         }
                         DropdownMenu(
                             expanded = viewModel.pExpanded,
-                            onDismissRequest = {viewModel.pExpanded = false}
+                            onDismissRequest = { viewModel.pExpanded = false }
                         ) {
-                            Column() {
+                            Column {
                                 PenButton(viewModel, BrushType.LINE, "Line")
                                 PenButton(viewModel, BrushType.CIRCLE, "Circle")
                                 PenButton(viewModel, BrushType.RECTANGLE, "Rectangle")
@@ -145,7 +139,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                         }
                     }
 
-                    Box() { //Color
+                    Box { //Color
                         IconButton(
                             onClick = { viewModel.cExpanded = true }
                         ) {
@@ -153,36 +147,36 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                                 imageVector = Icons.Default.Circle,
                                 contentDescription = "Open color menu",
                                 tint = viewModel.selectedColor,
-                                modifier = if(viewModel.selectedColor == Color.Black) {
-                                    Modifier.border(width = 2.dp, color = Color.White, CircleShape)
+                                modifier = if (viewModel.selectedColor == Color.Black) {
+                                    Modifier
+                                        .border(width = 2.dp, color = Color.White, CircleShape)
                                         .size(48.dp)
-                                }
-                                else {
+                                } else {
                                     Modifier.size(48.dp)
                                 }
                             )
                         }
                         DropdownMenu(
                             expanded = viewModel.cExpanded,
-                            onDismissRequest = {viewModel.cExpanded = false}
+                            onDismissRequest = { viewModel.cExpanded = false }
                         ) {
-                            Column() {
-                                Row() {
+                            Column {
+                                Row {
                                     ColorButton(viewModel, Color.Magenta, "Magenta")
                                     ColorButton(viewModel, Color.Green, "Green")
                                     ColorButton(viewModel, Color.White, "White")
                                 }
-                                Row() {
+                                Row {
                                     ColorButton(viewModel, Color.Red, "Red")
                                     ColorButton(viewModel, Color.Cyan, "Cyan")
                                     ColorButton(viewModel, Color.LightGray, "LightGray")
                                 }
-                                Row() {
+                                Row {
                                     ColorButton(viewModel, Color(0xFFFFA500), "Orange") //Orange
                                     ColorButton(viewModel, Color.Blue, "Blue")
                                     ColorButton(viewModel, Color.Gray, "Gray")
                                 }
-                                Row() {
+                                Row {
                                     ColorButton(viewModel, Color.Yellow, "Yellow")
                                     ColorButton(viewModel, Color(0xFFA500FF), "Purple") //Purple
                                     ColorButton(viewModel, Color.Black, "Black")
@@ -190,7 +184,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                             }
                         }
                     }
-                    Box() { //Pen size
+                    Box { //Pen size
                         IconButton(
                             onClick = { viewModel.sExpanded = true }
                         ) {
@@ -203,7 +197,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                         }
                         DropdownMenu(
                             expanded = viewModel.sExpanded,
-                            onDismissRequest = {viewModel.sExpanded = false},
+                            onDismissRequest = { viewModel.sExpanded = false },
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(
@@ -215,8 +209,9 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                                 Spacer(modifier = Modifier.height(50.dp))
                                 Slider(
                                     value = (viewModel.penSize - 8) / 40,
-                                    onValueChange = {viewModel.changePenSize((it * 40) + 8)},
-                                    modifier = Modifier.graphicsLayer( {rotationZ = 270f})
+                                    onValueChange = { viewModel.changePenSize((it * 40) + 8) },
+                                    modifier = Modifier
+                                        .graphicsLayer({ rotationZ = 270f })
                                         .width(120.dp)
                                         .height(36.dp)
                                         .testTag("Slider")
@@ -236,7 +231,9 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
         }
     ) { innerPadding ->
         Box(
-            modifier = Modifier.fillMaxSize().padding(innerPadding)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
             Canvas(
                 modifier = Modifier
@@ -267,53 +264,56 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
                 viewModel.image?.let { it ->
                     drawImage(
                         image = it.asImageBitmap(),
-                        dstSize = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt())
+                        dstSize = androidx.compose.ui.unit.IntSize(
+                            size.width.toInt(),
+                            size.height.toInt()
+                        )
                     )
                 }
             }
         }
     }
 
-        if (showSaveDialog) {
-            drawingNameInput = viewModel.currentDrawingName
-            AlertDialog(
-                onDismissRequest = { showSaveDialog = false },
-                title = { Text("Enter Drawing Name") },
-                containerColor = Background,
-                text = {
-                    Column {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = drawingNameInput,
-                            onValueChange = { drawingNameInput = it },
-                            label = { Text("Drawing Name") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (drawingNameInput.isNotBlank()) {
-                                showSaveDialog = false
-                                viewModel.saveDrawing(drawingNameInput.trim())
-                                myNavController.navigate("main")
-                            }
-                        },
-                        enabled = drawingNameInput.isNotBlank()
-                    ) {
-                        Text("Save")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showSaveDialog = false }) {
-                        Text("Cancel")
-                    }
+    if (showSaveDialog) {
+        drawingNameInput = viewModel.currentDrawingName
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text("Enter Drawing Name") },
+            containerColor = Background,
+            text = {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = drawingNameInput,
+                        onValueChange = { drawingNameInput = it },
+                        label = { Text("Drawing Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-            )
-        }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (drawingNameInput.isNotBlank()) {
+                            showSaveDialog = false
+                            viewModel.saveDrawing(drawingNameInput.trim())
+                            myNavController.navigate("main")
+                        }
+                    },
+                    enabled = drawingNameInput.isNotBlank()
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showSaveDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
+}
 
 enum class BrushType {
     LINE, CIRCLE, RECTANGLE
@@ -322,7 +322,7 @@ enum class BrushType {
 @Composable
 fun PenButton(viewModel: KLSViewModel, brushType: BrushType, brushName: String) {
     OutlinedIconButton(
-        onClick = { viewModel.pExpanded = false; viewModel.changeBrushType(brushType)},
+        onClick = { viewModel.pExpanded = false; viewModel.changeBrushType(brushType) },
         border = if (viewModel.brushType == brushType) {
             BorderStroke(width = 2.dp, color = Color.White)
         } else {
@@ -330,9 +330,13 @@ fun PenButton(viewModel: KLSViewModel, brushType: BrushType, brushName: String) 
         }
     ) {
         Icon(
-            imageVector = if (brushType == BrushType.LINE) { Icons.Default.HorizontalRule }
-            else if (brushType == BrushType.CIRCLE) { Icons.Default.Circle }
-            else { Icons.Default.Square },
+            imageVector = if (brushType == BrushType.LINE) {
+                Icons.Default.HorizontalRule
+            } else if (brushType == BrushType.CIRCLE) {
+                Icons.Default.Circle
+            } else {
+                Icons.Default.Square
+            },
             contentDescription = "$brushName button"
         )
     }
@@ -355,10 +359,9 @@ fun ColorButton(viewModel: KLSViewModel, color: Color, colorName: String) {
             imageVector = Icons.Default.Circle,
             contentDescription = "$colorName button",
             tint = color,
-            modifier = if(color == Color.Black) {
+            modifier = if (color == Color.Black) {
                 Modifier.border(width = 2.dp, color = Color.White, CircleShape)
-            }
-            else {
+            } else {
                 Modifier
             }
         )

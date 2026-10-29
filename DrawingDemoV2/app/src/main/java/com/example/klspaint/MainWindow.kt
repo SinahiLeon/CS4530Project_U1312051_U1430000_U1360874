@@ -1,8 +1,10 @@
 package com.example.klspaint
 
+import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
@@ -16,22 +18,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.example.klspaint.ui.theme.Background
@@ -47,6 +46,17 @@ fun MainWindow(
 
     // get saved drawings from Room
     val drawings by klsViewModel.allDrawings.collectAsStateWithLifecycle()
+
+    // opens media gallery to select an image
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+            ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            klsViewModel.importImage(it);
+            myNavController.navigate("canvas")
+        }
+    }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     Scaffold(
@@ -79,6 +89,16 @@ fun MainWindow(
                         Icon(
                             imageVector = Icons.Default.AddCircle,
                             contentDescription = "Create new drawing"
+                        )
+                    }
+                    IconButton(onClick = {
+                        launcher.launch("image/*")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = "Open gallery",
+                            tint = onBackground,
+                            modifier = Modifier.size(48.dp)
                         )
                     }
                 },

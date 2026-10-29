@@ -1,16 +1,13 @@
 package com.example.klspaint
-import android.content.ContentValues
+
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.ACTION_SEND
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
@@ -208,29 +205,29 @@ class KLSViewModel(
         }
     }
 
-    fun exportImage(fileName: String) {
-        val bitmap = image ?: return
-        viewModelScope.launch(Dispatchers.IO) {
-            val content = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
-                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                put(
-                    MediaStore.MediaColumns.RELATIVE_PATH,
-                    Environment.DIRECTORY_PICTURES + "/KLSPaint"
-                )
-            }
-
-            val imageUri = appContext.contentResolver.insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                content
-            )
-            imageUri?.let {
-                appContext.contentResolver.openOutputStream(it).use {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it!!)
-                }
-            }
-        }
-    }
+//    fun exportImage(fileName: String) {
+//        val bitmap = image ?: return
+//        viewModelScope.launch(Dispatchers.IO) {
+//            val content = ContentValues().apply {
+//                put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
+//                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+//                put(
+//                    MediaStore.MediaColumns.RELATIVE_PATH,
+//                    Environment.DIRECTORY_PICTURES + "/KLSPaint"
+//                )
+//            }
+//
+//            val imageUri = appContext.contentResolver.insert(
+//                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+//                content
+//            )
+//            imageUri?.let {
+//                appContext.contentResolver.openOutputStream(it).use {
+//                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it!!)
+//                }
+//            }
+//        }
+//    }
 
     fun shareDrawing(drawing: KLSDrawing? = null) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -244,6 +241,7 @@ class KLSViewModel(
                 } else {
                     val bitmap = image ?: return@launch
                     existingFile.parentFile?.mkdirs()
+                    // save to file (same as in saveDrawing)
                     FileOutputStream(existingFile).use {
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                     }
@@ -281,6 +279,8 @@ class KLSViewModel(
         }
     }
 }
+
+
 
 object KLSViewModelProvider {
     val Factory = viewModelFactory {
