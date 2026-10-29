@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HorizontalRule
@@ -102,6 +103,18 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                             contentDescription = "Save drawing",
                             tint = onBackground,
                             modifier = Modifier.size(36.dp)
+                        )
+                    }
+                    IconButton(onClick = {
+                        viewModel.deleteDrawing()
+                        myNavController.navigate("main")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete drawing",
+                            tint = onBackground,
+                            modifier = Modifier.size(36.dp)
+
                         )
                     }
                 },

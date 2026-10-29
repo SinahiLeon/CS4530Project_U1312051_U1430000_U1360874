@@ -4,6 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -20,20 +23,25 @@ class DrawingUnitTest {
 
     @Before
     fun setup(){
-        viewModel = KLSViewModel()
+        val Factory = viewModelFactory {
+            initializer {
+                val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KLSApplication
+                KLSViewModel( app.klsRepository, app)
+            }
+        }
     }
 
     @Test
     fun testInitializedState() {
         val strokes by mutableStateOf(listOf<Stroke>())
 
-        assertEquals(strokes, viewModel.strokes)
-        assertEquals(Color.Black, viewModel.selectedColor)
-        assertEquals(8f, viewModel.penSize)
-        assertEquals(BrushType.LINE, viewModel.brushType)
-        assertFalse(viewModel.pExpanded)
-        assertFalse(viewModel.cExpanded)
-        assertFalse(viewModel.sExpanded)
+        assertEquals(strokes, KLSViewModel.strokes)
+        assertEquals(Color.Black, KLSViewModel.selectedColor)
+        assertEquals(8f, KLSViewModel.penSize)
+        assertEquals(BrushType.LINE, KLSViewModel.brushType)
+        assertFalse(KLSViewModel.pExpanded)
+        assertFalse(KLSViewModel.cExpanded)
+        assertFalse(KLSViewModel.sExpanded)
     }
 
     @Test

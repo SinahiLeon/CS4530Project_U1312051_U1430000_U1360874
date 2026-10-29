@@ -180,9 +180,9 @@ class KLSViewModel(
         }
     }
 
-    fun deleteDrawing(drawing: KLSDrawing) {
-        File(drawing.imagePath).delete()
-        repository.deleteDrawing(drawing)
+    fun deleteDrawing() {
+        File(currentDrawing.imagePath).delete()
+        repository.deleteDrawing(currentDrawing)
     }
 
     fun importImage(uri: Uri) {
