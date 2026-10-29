@@ -1,6 +1,8 @@
 package com.example.klspaint
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.ACTION_SEND
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -17,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -46,7 +49,10 @@ class KLSViewModel(
             initialValue = listOf()
         )
 
-    private var currentDrawing: KLSDrawing = KLSDrawing("")
+    private var currentDrawing: KLSDrawing = KLSDrawing("", "")
+    var currentDrawingName by mutableStateOf("")
+        private set
+
     var image by mutableStateOf<Bitmap?>(null)
         private set
 
@@ -69,9 +75,9 @@ class KLSViewModel(
         private set
 
     private var canvas: Canvas? = null
-    var pExpanded by mutableStateOf( false )
-    var cExpanded by mutableStateOf( false )
-    var sExpanded by mutableStateOf( false )
+    var pExpanded by mutableStateOf(false)
+    var cExpanded by mutableStateOf(false)
+    var sExpanded by mutableStateOf(false)
 
     private var lastOffset: Offset? = null // Offset represents 1 position using an X Y coordinate
 
@@ -103,28 +109,33 @@ class KLSViewModel(
     fun startStroke(offset: Offset) {
         lastOffset = offset
         addPoint(offset)
-        }
+    }
 
     // Receives the newest (x,y) position as the user's finger moves
     fun addPoint(offset: Offset) {
-        val thisCanvas = canvas?: return
+        val thisCanvas = canvas ?: return
         val half = penSize / 2
         when (brushType) {
             BrushType.LINE -> {
                 val temp = lastOffset
-                if(temp != null) {
-                    thisCanvas.drawLine(temp.x, temp.y,
+                if (temp != null) {
+                    thisCanvas.drawLine(
+                        temp.x, temp.y,
                         offset.x, offset.y,
                         selectedPaint
                     )
                 }
             }
+
             BrushType.CIRCLE -> {
                 thisCanvas.drawCircle(offset.x, offset.y, half, selectedPaint)
             }
+
             BrushType.RECTANGLE -> {
-                thisCanvas.drawRect(offset.x - half, offset.y - half,
-                    offset.x + half, offset.y + half, selectedPaint)
+                thisCanvas.drawRect(
+                    offset.x - half, offset.y - half,
+                    offset.x + half, offset.y + half, selectedPaint
+                )
             }
         }
         lastOffset = offset     //connect each segment to consecutive point
@@ -139,21 +150,24 @@ class KLSViewModel(
         return file.absolutePath
     }
 
-    fun saveDrawing() {
-        val bitmap = image?: return
+    fun saveDrawing(name: String) {
+        val bitmap = image ?: return
+        currentDrawing.name = name
+        currentDrawingName = name
         viewModelScope.launch(Dispatchers.IO) {
             val file = File(currentDrawing.imagePath)
             FileOutputStream(file).use {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
             }
 
-            repository.addDrawing(KLSDrawing(file.absolutePath))
+            repository.addDrawing(currentDrawing)
         }
     }
 
     fun loadDrawing(drawing: KLSDrawing) {
         viewModelScope.launch(Dispatchers.IO) {
             currentDrawing = drawing
+            currentDrawingName = drawing.name
             val file = File(drawing.imagePath)
             if (file.exists()) {
                 val bitmap = BitmapFactory
@@ -169,7 +183,7 @@ class KLSViewModel(
         }
     }
 
-    fun deleteDrawing(drawing : KLSDrawing) {
+    fun deleteDrawing(drawing: KLSDrawing) {
         File(drawing.imagePath).delete()
         repository.deleteDrawing(drawing)
     }
@@ -177,9 +191,13 @@ class KLSViewModel(
     fun importImage(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             val inputStream = appContext.contentResolver.openInputStream(uri)
-            val decodedBitmap = BitmapFactory.decodeStream(inputStream)?.copy(Bitmap.Config.ARGB_8888, true)
+            val decodedBitmap =
+                BitmapFactory.decodeStream(inputStream)?.copy(Bitmap.Config.ARGB_8888, true)
             inputStream?.close()
-            currentDrawing = KLSDrawing(genFilePath())
+            currentDrawing = KLSDrawing(genFilePath(), "")
+            withContext(Dispatchers.Main) {
+                currentDrawingName = ""
+            }
 
             decodedBitmap?.let { bitmap ->
                 withContext(Dispatchers.Main) {
@@ -191,20 +209,75 @@ class KLSViewModel(
     }
 
     fun exportImage(fileName: String) {
-        val bitmap = image?: return
+        val bitmap = image ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val content = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/KLSPaint")
+                put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    Environment.DIRECTORY_PICTURES + "/KLSPaint"
+                )
             }
 
-            val imageUri = appContext.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, content)
+            val imageUri = appContext.contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                content
+            )
             imageUri?.let {
                 appContext.contentResolver.openOutputStream(it).use {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, it!!)
                 }
             }
+        }
+    }
+
+    fun shareDrawing(drawing: KLSDrawing? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val targetDrawing = drawing ?: currentDrawing
+            val file = if (targetDrawing.imagePath.isNotBlank()) {
+                val existingFile = File(targetDrawing.imagePath)
+                // if a path and file exists, use it
+                if (existingFile.exists()) {
+                    existingFile
+                // if a path but not a file exists, create a new file
+                } else {
+                    val bitmap = image ?: return@launch
+                    existingFile.parentFile?.mkdirs()
+                    FileOutputStream(existingFile).use {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    }
+                    existingFile
+                }
+            // if both a path and file do not exist, create a temporary path in the cache and add a file
+            } else {
+                val bitmap = image ?: return@launch
+                val cacheFile = File(appContext.cacheDir, "shared_drawing_${System.currentTimeMillis()}.png")
+                FileOutputStream(cacheFile).use {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                }
+                cacheFile
+            }
+
+
+            val uri: Uri = FileProvider.getUriForFile(
+                appContext,
+                "${appContext.packageName}.provider",
+                file
+            )
+
+            // Pull up the sharing screen
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/png"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(intent, "Share Drawing").apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+            appContext.startActivity(chooser)
         }
     }
 }

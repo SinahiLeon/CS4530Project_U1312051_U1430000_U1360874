@@ -14,7 +14,7 @@ class KLSApplication : Application() {
             applicationContext,
             KLSDatabase::class.java,
             "kls_database"
-        ).build()
+        ).fallbackToDestructiveMigration(true).build()
     }
 
     val klsRepository by lazy { KLSRepository(scope, db.klsDao()) }
