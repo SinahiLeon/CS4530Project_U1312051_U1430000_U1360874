@@ -128,6 +128,7 @@ class KLSViewModel(
                     offset.x + half, offset.y + half, selectedPaint)
             }
         }
+        lastOffset = offset     //connect each segment to consecutive point
     }
 
     fun endStroke() {
@@ -156,7 +157,9 @@ class KLSViewModel(
             currentDrawing = drawing
             val file = File(drawing.imagePath)
             if (file.exists()) {
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath).copy(Bitmap.Config.ARGB_8888, true)
+                val bitmap = BitmapFactory
+                    .decodeFile(file.absolutePath)
+                    .copy(Bitmap.Config.ARGB_8888, true)
                 bitmap.let {
                     withContext(Dispatchers.Main) {
                         image = it

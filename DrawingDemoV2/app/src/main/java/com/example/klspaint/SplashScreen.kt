@@ -4,27 +4,28 @@ import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BubbleChart
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.animation.core.Animatable
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.scale
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun SplashScreen(myNavController : NavHostController) {
     val scale = remember {
-        androidx.compose.animation.core.Animatable(0f)
+        Animatable(0f)
     }
 
     // Animation, code from https://www.geeksforgeeks.org/kotlin/animated-splash-screen-in-android-using-jetpack-compose/
@@ -44,17 +45,19 @@ fun SplashScreen(myNavController : NavHostController) {
 
     // Logo
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ) {
-        Row {
-            Icon(
-                imageVector = Icons.Default.BubbleChart,
-                contentDescription = "Temporary logo",
-                tint = Color(0xFFF78EA2),
-                modifier = Modifier.size(120.dp)
-            )
-        }
+    )
+    {
+        Image(
+            painter = painterResource(id= R.drawable.splash_image),
+            contentDescription = "KLSPaint splash logo",
+            modifier = Modifier
+                .size(700.dp)
+                .scale(scale.value)
+        )
     }
 }
