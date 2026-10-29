@@ -32,8 +32,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -41,9 +39,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 
 @Composable
-fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController) {
+fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController)
+{
+    var redraw by remember { mutableStateOf(0) }
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -62,6 +69,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController) {
                         onDrag = { change, _ ->
                             change.consume()
                             viewModel.addPoint(change.position)
+                            redraw++
                         },
                         // Canvas detects cursor up
                         onDragEnd = {
@@ -70,6 +78,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController) {
                     )
                 }
         ) {
+            redraw
             // Draw the image
             viewModel.image?.let { it ->
                 drawImage(
@@ -89,6 +98,26 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController : NavHostController) {
                 contentColor = Color.White
             )
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                Arrangement.SpaceEvenly
+            ){
+                Button(onClick = {
+                    viewModel.saveDrawing()
+                    myNavController.navigate("main")
+                }) {
+                    Text("Save")
+                }
+                Button(onClick = {
+                    myNavController.navigate("main")
+                })
+                {
+                    Text("Back")
+                }
+            }
+
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
