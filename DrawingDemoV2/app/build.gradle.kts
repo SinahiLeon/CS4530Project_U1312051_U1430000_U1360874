@@ -56,6 +56,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.8.5")
     implementation(libs.androidx.ui.graphics)
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.17")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

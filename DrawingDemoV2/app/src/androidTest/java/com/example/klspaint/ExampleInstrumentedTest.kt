@@ -1,5 +1,6 @@
 package com.example.klspaint
 
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import org.junit.Assert.assertNotEquals
+import org.junit.Before
 
 
 /**
@@ -27,6 +29,24 @@ class DrawingInstrumentedTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    // Open the "Create new drawing" button/page so that we can access the toolbar
+    @Before
+    fun setup() {
+        try {
+            composeTestRule.waitUntil(5000) {
+                composeTestRule
+                    .onAllNodesWithContentDescription("Create new drawing")
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            composeTestRule
+                .onNodeWithContentDescription("Create new drawing")
+                .performClick()
+        } catch (_: Exception) {
+            // Already on canvas
+        }
+    }
 
     @Test
     fun useAppContext() {
