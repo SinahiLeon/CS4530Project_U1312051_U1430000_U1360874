@@ -100,6 +100,7 @@ class KLSViewModel(
         image = bitmap
         canvas = thisCanvas
         currentDrawing = KLSDrawing(genFilePath())
+        currentDrawingName = ""
     }
 
     // When the cursor first touches the screen, this function receives the loc of that cursor
