@@ -1,5 +1,7 @@
 package com.example.klspaint
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -128,7 +130,12 @@ fun MainWindow(
                         }, colors = ButtonDefaults.buttonColors(
                             containerColor = Background,
                             contentColor = onBackground
-                        ), modifier = Modifier.fillMaxWidth() ){
+                        ), modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                contentDescription = "Drawing ${drawing.id}"
+                            }
+                        ){
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -141,7 +148,11 @@ fun MainWindow(
                                 }, colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White,
                                     contentColor = Color.Black
-                                )){
+                                ), modifier = Modifier
+                                    .semantics {
+                                        contentDescription = "Share drawing ${drawing.id}"
+                                    }
+                                ){
                                     Text("Share")
                                 }
                             }
