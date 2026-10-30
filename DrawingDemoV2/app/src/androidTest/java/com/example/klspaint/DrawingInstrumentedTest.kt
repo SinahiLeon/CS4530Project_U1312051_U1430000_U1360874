@@ -43,18 +43,22 @@ class DrawingInstrumentedTest {
     // Open the "Create new drawing" button/page so that we can access the toolbar
     @Before
     fun setup() {
-        try {
-            composeTestRule.waitUntil(5000) {
-                composeTestRule
-                    .onAllNodesWithContentDescription("Create new drawing")
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
-            }
+        composeTestRule.waitUntil(20000) {
             composeTestRule
-                .onNodeWithContentDescription("Create new drawing")
-                .performClick()
-        } catch (_: Exception) {
-            // Already on canvas
+                .onAllNodesWithContentDescription("Create new drawing")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule
+            .onNodeWithContentDescription("Create new drawing")
+            .performClick()
+
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Save drawing")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
     }
 
@@ -342,6 +346,114 @@ class DrawingInstrumentedTest {
         composeTestRule.onNodeWithText(name).assertIsDisplayed()
     }
 
+
+    @Test
+    fun testDeleteSavedDrawing() {
+        val name = "Delete_${System.currentTimeMillis()}"
+
+        // Save a new drawing
+        composeTestRule
+            .onNodeWithContentDescription("Save drawing")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Drawing Name")
+            .performTextInput(name)
+
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithText(name, useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Reopen the drawing
+        composeTestRule
+            .onNodeWithText(name, useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithContentDescription("Delete drawing")
+            .performClick()
+
+        // Verify it disappears from the main window
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithText(name, useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
+        }
+
+        composeTestRule.onNodeWithText("My Drawings").assertIsDisplayed()
+    }
+
+
+    @Test
+    fun testRenameSavedDrawingThroughUI() {
+        val oldName = "Original_${System.currentTimeMillis()}"
+        val newName = "Renamed_${System.currentTimeMillis()}"
+
+        // Save original
+        composeTestRule.onNodeWithContentDescription("Save drawing").performClick()
+        composeTestRule.onNodeWithText("Drawing Name").performTextInput(oldName)
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithText(oldName, useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Reopen
+        composeTestRule
+            .onNodeWithText(oldName, useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule.onNodeWithContentDescription("Save drawing").performClick()
+
+        composeTestRule
+            .onNodeWithText("Drawing Name")
+            .performTextReplacement(newName)
+
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        // Confirm new name is displayed
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithText(newName, useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule
+            .onNodeWithText(newName, useUnmergedTree = true)
+            .assertExists()
+    }
+
+    @Test
+    fun testSavedDrawingHasShareButton() {
+        val name = "Share_${System.currentTimeMillis()}"
+
+        composeTestRule.onNodeWithContentDescription("Save drawing").performClick()
+        composeTestRule.onNodeWithText("Drawing Name").performTextInput(name)
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithText(name, useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        assertTrue(
+            composeTestRule
+                .onAllNodesWithContentDescription(
+                    "Share drawing",
+                    substring = true,
+                    useUnmergedTree = true
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        )
+    }
 
 
 }
