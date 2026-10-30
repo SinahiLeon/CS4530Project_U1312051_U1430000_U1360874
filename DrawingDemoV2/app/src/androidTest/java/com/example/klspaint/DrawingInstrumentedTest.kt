@@ -14,12 +14,19 @@ import org.junit.runner.RunWith
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import androidx.lifecycle.ViewModelProvider
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
+
 
 
 /**
@@ -256,6 +263,83 @@ class DrawingInstrumentedTest {
 
         composeTestRule.waitForIdle()
         assertEquals("Updated Name", viewModel.currentDrawingName)
+    }
+
+    @Test
+    fun TestNavigateBackToMainWindow() {
+        composeTestRule
+            .onNodeWithContentDescription("Back to home")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("My Drawings")
+            .assertIsDisplayed()
+    }
+
+
+    @Test
+    fun testSaveDrawingAppearsOnMainWindow() {
+        val name = "TestSave_${System.currentTimeMillis()}"
+
+        composeTestRule
+            .onNodeWithContentDescription("Save drawing")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Drawing Name")
+            .performTextInput(name)
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        // Confirm we returned to the main window
+        composeTestRule
+            .onNodeWithText("My Drawings")
+            .assertIsDisplayed()
+
+        // Wait for Room to update the saved drawings list
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithText(name, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule
+            .onNodeWithText(name, useUnmergedTree = true)
+            .assertExists()
+    }
+
+
+    @Test
+    fun testReopenSavedDrawing() {
+        val name = "TestReopen_${System.currentTimeMillis()}"
+
+        composeTestRule
+            .onNodeWithContentDescription("Save drawing")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Drawing Name")
+            .performTextInput(name)
+
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        composeTestRule.waitUntil(10000) {
+            composeTestRule.onAllNodesWithText(name)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithText(name).performClick()
+
+        composeTestRule.waitUntil(10000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Save drawing")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithText(name).assertIsDisplayed()
     }
 
 
