@@ -57,6 +57,12 @@ import androidx.navigation.NavHostController
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.klspaint.ui.theme.Background
 import com.example.klspaint.ui.theme.onBackground
+import androidx.compose.ui.test.on
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertExists
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

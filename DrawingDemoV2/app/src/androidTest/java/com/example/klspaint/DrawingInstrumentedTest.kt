@@ -17,6 +17,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
+import androidx.lifecycle.ViewModelProvider
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 
 
 /**
@@ -224,7 +227,38 @@ class DrawingInstrumentedTest {
         assertNotEquals(8f, viewModel.penSize)
     }
 
+    @Test
+    fun testCreateNewDrawing() {
+        val viewModel = ViewModelProvider(
+            composeTestRule.activity
+        )[KLSViewModel::class.java]
+
+        composeTestRule.runOnUiThread {
+            viewModel.createNewDrawing()
+        }
+        composeTestRule.waitForIdle()
+
+        assertNotNull(viewModel.image)
+        assertEquals("", viewModel.currentDrawingName)
+    }
+
+    @Test
+    fun testRenameDrawing() {
+        val viewModel = ViewModelProvider(
+            composeTestRule.activity
+        )[KLSViewModel::class.java]
+
+        composeTestRule.runOnUiThread {
+            viewModel.createNewDrawing()
+            viewModel.saveDrawing("OG Name")
+            viewModel.saveDrawing("Updated Name")
+        }
+
+        composeTestRule.waitForIdle()
+        assertEquals("Updated Name", viewModel.currentDrawingName)
+    }
+
+
+
 }
 
-// Test various stroke properties stored in view model
-// Test that when canvas is clicked, point added
