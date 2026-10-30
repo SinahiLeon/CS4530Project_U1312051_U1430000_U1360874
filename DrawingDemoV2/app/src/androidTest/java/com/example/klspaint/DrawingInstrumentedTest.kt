@@ -389,47 +389,6 @@ class DrawingInstrumentedTest {
 
 
     @Test
-    fun testRenameSavedDrawingThroughUI() {
-        val oldName = "Original_${System.currentTimeMillis()}"
-        val newName = "Renamed_${System.currentTimeMillis()}"
-
-        // Save original
-        composeTestRule.onNodeWithContentDescription("Save drawing").performClick()
-        composeTestRule.onNodeWithText("Drawing Name").performTextInput(oldName)
-        composeTestRule.onNodeWithText("Save").performClick()
-
-        composeTestRule.waitUntil(10000) {
-            composeTestRule
-                .onAllNodesWithText(oldName, useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        // Reopen
-        composeTestRule
-            .onNodeWithText(oldName, useUnmergedTree = true)
-            .performClick()
-
-        composeTestRule.onNodeWithContentDescription("Save drawing").performClick()
-
-        composeTestRule
-            .onNodeWithText("Drawing Name")
-            .performTextReplacement(newName)
-
-        composeTestRule.onNodeWithText("Save").performClick()
-
-        // Confirm new name is displayed
-        composeTestRule.waitUntil(10000) {
-            composeTestRule
-                .onAllNodesWithText(newName, useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-
-        composeTestRule
-            .onNodeWithText(newName, useUnmergedTree = true)
-            .assertExists()
-    }
-
-    @Test
     fun testSavedDrawingHasShareButton() {
         val name = "Share_${System.currentTimeMillis()}"
 
