@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
@@ -26,6 +28,9 @@ import kotlinx.coroutines.flow.stateIn
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -46,6 +51,8 @@ class KLSViewModel(
             initialValue = listOf()
         )
 
+    private val _infoBoxes = MutableStateFlow<List<KLSInfoBox>>(emptyList())
+    val infoBoxes: StateFlow<List<KLSInfoBox>> = _infoBoxes.asStateFlow()
     private var currentDrawing: KLSDrawing = KLSDrawing("", "")
     var currentDrawingName by mutableStateOf("")
         private set
@@ -75,6 +82,8 @@ class KLSViewModel(
     var pExpanded by mutableStateOf(false)
     var cExpanded by mutableStateOf(false)
     var sExpanded by mutableStateOf(false)
+
+    var overlayVisible by mutableStateOf(false)
 
     private var lastOffset: Offset? = null // Offset represents 1 position using an X Y coordinate
 
@@ -278,6 +287,24 @@ class KLSViewModel(
 
             appContext.startActivity(chooser)
         }
+    }
+
+    fun getAiAnalysis(image: ImageBitmap) {
+        viewModelScope.launch {
+            //TODO: Actually implement this function; this is a dummy to test the frontend
+            _infoBoxes.value = listOf(
+                KLSInfoBox(
+                    description = "Cat",
+                    rect = Rect(left = 20f, top = 20f, right = 40f, bottom = 40f),
+                    confidence = 0.94f
+                )
+            )
+        }
+    }
+
+    fun parseAiOutput(aiOutpur: String): List<KLSInfoBox>? {
+        //TODO: Feel free to parse AI output here, or parse in the getAiAnalysis function
+        return null
     }
 }
 
