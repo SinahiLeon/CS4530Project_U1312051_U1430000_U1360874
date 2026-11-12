@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
@@ -30,7 +31,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -210,6 +210,7 @@ class KLSViewModel(
                 withContext(Dispatchers.Main) {
                     image = bitmap
                     canvas = Canvas(bitmap)
+                    getAiAnalysis(bitmap.asImageBitmap())
                 }
             }
         }
@@ -292,17 +293,19 @@ class KLSViewModel(
     fun getAiAnalysis(image: ImageBitmap) {
         viewModelScope.launch {
             //TODO: Actually implement this function; this is a dummy to test the frontend
+            //_infoBoxes.value = parseAiOutput("Whatever the AI spits out")
             _infoBoxes.value = listOf(
                 KLSInfoBox(
                     description = "Cat",
-                    rect = Rect(left = 20f, top = 20f, right = 40f, bottom = 40f),
+                    rect = Rect(left = 200f, top = 200f, right = 1000f, bottom = 1000f),
                     confidence = 0.94f
                 )
             )
+            overlayVisible = true
         }
     }
 
-    fun parseAiOutput(aiOutpur: String): List<KLSInfoBox>? {
+    fun parseAiOutput(aiOutput: String): List<KLSInfoBox>? {
         //TODO: Feel free to parse AI output here, or parse in the getAiAnalysis function
         return null
     }

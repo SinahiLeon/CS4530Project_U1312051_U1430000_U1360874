@@ -4,6 +4,7 @@ package com.example.klspaint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,8 +46,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -57,6 +60,12 @@ import androidx.navigation.NavHostController
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.klspaint.ui.theme.Background
 import com.example.klspaint.ui.theme.onBackground
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +73,8 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
     var redraw by remember { mutableStateOf(0) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var drawingNameInput by remember { mutableStateOf("") }
+    val boxes by viewModel.infoBoxes.collectAsState()
+    val textMeasurer = rememberTextMeasurer()
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     Scaffold(
@@ -274,14 +285,42 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
             ) {
                 redraw
                 // Draw the image
-                viewModel.image?.let { it ->
+                viewModel.image?.let {
                     drawImage(
                         image = it.asImageBitmap(),
-                        dstSize = androidx.compose.ui.unit.IntSize(
+                        dstSize = IntSize(
                             size.width.toInt(),
                             size.height.toInt()
                         )
                     )
+                }
+            }
+            if(viewModel.overlayVisible) {
+                Canvas(modifier = Modifier
+                    .fillMaxSize()
+                    .clickable {
+                        viewModel.overlayVisible = false
+                    }
+                ) {
+                    boxes.forEach {
+                        drawRect(
+                            color = Color.Green,
+                            topLeft = it.rect.topLeft,
+                            size = it.rect.size,
+                            style = Stroke(width = 4f)
+                        )
+                        drawText(
+                            color = Color.Green,
+                            textLayoutResult = textMeasurer.measure(
+                                text = "${it.description} (${(it.confidence * 100).toInt()}%)",
+                                style = TextStyle(
+                                    color = Color.Green,
+                                    fontSize = 18.sp
+                                )
+                            ),
+                            topLeft = it.rect.topLeft + Offset(0f, -60f)
+                        )
+                    }
                 }
             }
         }
