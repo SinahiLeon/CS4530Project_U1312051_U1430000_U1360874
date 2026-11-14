@@ -1,13 +1,33 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     id("com.google.devtools.ksp")
 }
+
+val secretsFile = rootProject.file("secrets.properties")
+val secretsMap = if (secretsFile.exists()) {
+    secretsFile.readLines()
+        .filter { it.contains("=") && !it.trim().startsWith("#") }
+        .associate { 
+            val parts = it.split("=", limit = 2)
+            parts[0].trim() to parts[1].trim()
+        }
+} else {
+    emptyMap()
+}
+
+//val apiKey = secretsMap["GEMINI_API_KEY"] ?: ""
+val visionApiKey = secretsMap["VISION_API_KEY"]
 
 android {
     namespace = "com.example.klspaint"
     compileSdk {
         version = release(37)
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {
@@ -18,6 +38,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        buildConfigField("String", "GEMINI_API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "VISION_API_KEY", "\"$visionApiKey\"")
     }
 
     buildTypes {
@@ -62,8 +84,16 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
+    androidTestImplementation("net.sf.kxml:kxml2:2.3.0")
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    implementation(platform("androidx.compose:compose-bom:2026.09.00"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+//    implementation(libs.google.generativeai)
 
+    // Ktor HTTP
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
 }

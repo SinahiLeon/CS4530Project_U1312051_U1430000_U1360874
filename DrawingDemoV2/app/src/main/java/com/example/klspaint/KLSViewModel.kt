@@ -28,14 +28,28 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewModelScope
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.apply
+import kotlinx.serialization.Serializable
+//import com.google.ai.client.generativeai.GenerativeModel
 
 class KLSViewModel(
     private val repository: KLSRepository,
@@ -51,7 +65,7 @@ class KLSViewModel(
             initialValue = listOf()
         )
 
-    private val _infoBoxes = MutableStateFlow<List<KLSInfoBox>>(emptyList())
+    private var _infoBoxes = MutableStateFlow<List<KLSInfoBox>>(emptyList())
     val infoBoxes: StateFlow<List<KLSInfoBox>> = _infoBoxes.asStateFlow()
     private var currentDrawing: KLSDrawing = KLSDrawing("", "")
     var currentDrawingName by mutableStateOf("")
@@ -207,6 +221,7 @@ class KLSViewModel(
             }
 
             decodedBitmap?.let { bitmap ->
+                println("analyzing imported image...")
                 withContext(Dispatchers.Main) {
                     image = bitmap
                     canvas = Canvas(bitmap)
@@ -290,28 +305,205 @@ class KLSViewModel(
         }
     }
 
+
+
     fun getAiAnalysis(image: ImageBitmap) {
-        viewModelScope.launch {
-            //TODO: Actually implement this function; this is a dummy to test the frontend
-            //_infoBoxes.value = parseAiOutput("Whatever the AI spits out")
-            _infoBoxes.value = listOf(
-                KLSInfoBox(
-                    description = "Cat",
-                    rect = Rect(left = 200f, top = 200f, right = 1000f, bottom = 1000f),
-                    confidence = 0.94f
+        val bitmap = this.image ?: return
+        viewModelScope.launch() {
+            try {
+                // From the documentation: BASE64_ENCODED_IMAGE: The base64 representation (ASCII string) of your binary image data. This string should look similar to the following string:
+                //
+                //    /9j/4QAYRXhpZgAA...9tAVx/zDQDlGxn//2Q==
+                //
+                val byteArrayOutputStream = java.io.ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream)
+                val imageBytes = byteArrayOutputStream.toByteArray()
+                val base64Image = android.util.Base64.encodeToString(imageBytes, android.util.Base64.DEFAULT)
+
+                val requestObj = RequestObj(
+                    requests = listOf(
+                        Request(
+                            image = Image(content = base64Image),
+                            features = listOf(
+                                Feature(maxResults = 10, type = "OBJECT_LOCALIZATION"),
+                            )
+                        )
+                    )
                 )
-            )
-            overlayVisible = true
+
+                val apiKey = BuildConfig.VISION_API_KEY
+
+                // Make Ktor request
+                val httpResponse = ApiClient.client.post("https://vision.googleapis.com/v1/images:annotate?key=$apiKey") {
+                    contentType(ContentType.Application.Json)
+                    setBody(requestObj)
+                }
+
+                android.util.Log.d("VisionAPI", "Response status: ${httpResponse.status}")
+                val response: ResponseObj = httpResponse.body()
+                android.util.Log.d("VisionAPI", "Parsed ResponseObj: $response")
+
+                val width = bitmap.width.toFloat()
+                val height = bitmap.height.toFloat()
+
+                val boxes = parseVisionOutput(response, width, height)
+                _infoBoxes.value = boxes
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
-    fun parseAiOutput(aiOutput: String): List<KLSInfoBox>? {
-        //TODO: Feel free to parse AI output here, or parse in the getAiAnalysis function
-        return null
+    private fun parseVisionOutput(responseObj: ResponseObj, width: Float, height: Float): List<KLSInfoBox> {
+        val boxes = mutableListOf<KLSInfoBox>()
+        try {
+            responseObj.responses.forEach { response ->
+                response.localizedObjectAnnotations?.forEach { obj ->
+                    val vertices = obj.boundingPoly?.normalizedVertices
+
+                    if (!vertices.isNullOrEmpty()) {
+                        var minX = 1f
+                        var minY = 1f
+                        var maxX = 0f
+                        var maxY = 0f
+
+                        vertices.forEach { v ->
+                            val x = v.x.coerceIn(0f, 1f)
+                            val y = v.y.coerceIn(0f, 1f)
+                            if (x < minX) minX = x
+                            if (y < minY) minY = y
+                            if (x > maxX) maxX = x
+                            if (y > maxY) maxY = y
+                        }
+
+                        val left = minX * width
+                        val top = minY * height
+                        val right = maxX * width
+                        val bottom = maxY * height
+
+                        boxes.add(KLSInfoBox(Rect(left, top, right, bottom), obj.name, obj.score))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return boxes
     }
 }
 
+// From HttpRequest Demo
+object ApiClient{
+    val client = HttpClient(Android){
+        install(ContentNegotiation){
+            json(Json {
+                isLenient = true
+                ignoreUnknownKeys =true
 
+            })
+        }
+    }
+}
+
+// Google Vision Request JSON body structure and the objects
+// {
+//  "requests": [
+//    {
+//      "image": {
+//        "content": "BASE64_ENCODED_IMAGE"
+//      },
+//      "features": [
+//        {
+//          "maxResults": RESULTS_INT,
+//          "type": "OBJECT_LOCALIZATION"
+//        },
+//      ]
+//    }
+//  ]
+//}
+@Serializable
+data class RequestObj(
+    val requests: List<Request>
+)
+
+@Serializable
+data class Request(
+    val image: Image,
+    val features: List<Feature>
+)
+
+@Serializable
+data class Image(
+    val content: String
+)
+
+
+@Serializable
+data class Feature(
+    val maxResults: Int,
+    val type: String
+)
+
+
+// Google Vision Response object
+// "responses": [
+//    {
+//      "localizedObjectAnnotations": [
+//        {
+//          "mid": "/m/01bqk0",
+//          "name": "Bicycle wheel",
+//          "score": 0.89648587,
+//          "boundingPoly": {
+//            "normalizedVertices": [
+//              {
+//                "x": 0.32076266,
+//                "y": 0.78941387
+//              },
+//              {
+//                "x": 0.43812272,
+//                "y": 0.78941387
+//              },
+//              {
+//                "x": 0.43812272,
+//                "y": 0.97331065
+//              },
+//              {
+//                "x": 0.32076266,
+//                "y": 0.97331065
+//              }
+//            ]
+//          }
+//        }
+//       ]
+//     }
+//   ]
+// }
+@Serializable
+data class ResponseObj(
+    val responses: List<Response> = emptyList()
+)
+
+@Serializable
+data class Response(
+    val localizedObjectAnnotations: List<LocalizedObjectAnnotation>? = null,
+)
+
+@Serializable
+data class LocalizedObjectAnnotation(
+    val name: String? = null,
+    val score: Float = 0f,
+    val boundingPoly: BoundingPoly? = null
+)
+@Serializable
+data class BoundingPoly(
+    val normalizedVertices: List<NormalizedVertex>? = null
+)
+
+@Serializable
+data class NormalizedVertex(
+    val x: Float = 0f,
+    val y: Float = 0f
+)
 
 object KLSViewModelProvider {
     val Factory = viewModelFactory {

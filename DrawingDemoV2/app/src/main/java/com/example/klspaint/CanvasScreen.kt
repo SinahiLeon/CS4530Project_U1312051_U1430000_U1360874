@@ -312,7 +312,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         drawText(
                             color = Color.Green,
                             textLayoutResult = textMeasurer.measure(
-                                text = "${it.description} (${(it.confidence * 100).toInt()}%)",
+                                text = "${it.description} (${((it.score ?: 0f) * 100).toInt()}%)",
                                 style = TextStyle(
                                     color = Color.Green,
                                     fontSize = 18.sp
