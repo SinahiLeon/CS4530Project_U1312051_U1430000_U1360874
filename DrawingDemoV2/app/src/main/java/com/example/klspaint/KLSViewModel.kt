@@ -343,11 +343,14 @@ class KLSViewModel(
                 val response: ResponseObj = httpResponse.body()
                 android.util.Log.d("VisionAPI", "Parsed ResponseObj: $response")
 
-                val width = bitmap.width.toFloat()
-                val height = bitmap.height.toFloat()
+//                val width = bitmap.width.toFloat()
+//                val height = bitmap.height.toFloat()
+//                println("width: $width, height: $height")
 
-                val boxes = parseVisionOutput(response, width, height)
+                // hardc-oded width and height instead.
+                val boxes = parseVisionOutput(response, 1080f, 1760f)
                 _infoBoxes.value = boxes
+                overlayVisible = true
             } catch (e: Exception) {
                 e.printStackTrace()
             }
