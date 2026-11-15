@@ -346,7 +346,7 @@ class KLSViewModel(
 //                println("width: $width, height: $height")
 
                 // hard-coded width and height instead.
-                val boxes = parseVisionOutput(response, 1080f, 1760f)
+                val boxes = parseVisionOutput(response, 1f, 1f)
                 _infoBoxes.value = boxes
                 overlayVisible = true
             } catch (e: Exception) {

@@ -338,8 +338,14 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                     boxes.forEach {
                         drawRect(
                             color = Color.Green,
-                            topLeft = it.rect.topLeft,
-                            size = it.rect.size,
+                            topLeft = Offset(
+                                it.rect.left * size.width,
+                                it.rect.top * size.height
+                            ),
+                            size = androidx.compose.ui.geometry.Size(
+                                it.rect.width * size.width,
+                                it.rect.height * size.height
+                            ),
                             style = Stroke(width = 4f)
                         )
                         drawText(
@@ -351,7 +357,10 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                                     fontSize = 18.sp
                                 )
                             ),
-                            topLeft = it.rect.topLeft + Offset(0f, -60f)
+                            topLeft = Offset(
+                                it.rect.left * size.width,
+                                (it.rect.top * size.height - 30f).coerceAtLeast(0f)
+                            )
                         )
                     }
                 }
