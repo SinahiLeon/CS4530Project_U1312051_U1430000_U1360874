@@ -3,6 +3,7 @@ package com.example.klspaint
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HorizontalRule
+import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material.icons.filled.Square
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
@@ -153,8 +155,10 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         }
                         DropdownMenu(
                             expanded = viewModel.pExpanded,
-                            onDismissRequest = { viewModel.pExpanded = false }
-                        ) {
+                            onDismissRequest = { viewModel.pExpanded = false },
+                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
+
+                            ) {
                             Column {
                                 PenButton(viewModel, BrushType.LINE, "Line")
                                 PenButton(viewModel, BrushType.CIRCLE, "Circle")
@@ -182,8 +186,9 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         }
                         DropdownMenu(
                             expanded = viewModel.cExpanded,
-                            onDismissRequest = { viewModel.cExpanded = false }
-                        ) {
+                            onDismissRequest = { viewModel.cExpanded = false },
+                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
+                            ) {
                             Column {
                                 Row {
                                     ColorButton(viewModel, Color.Magenta, "Magenta")
@@ -222,7 +227,9 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         DropdownMenu(
                             expanded = viewModel.sExpanded,
                             onDismissRequest = { viewModel.sExpanded = false },
-                        ) {
+                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
+
+                            ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(
                                     imageVector = Icons.Default.Circle,
@@ -247,6 +254,32 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                                     tint = Color.White,
                                     modifier = Modifier.size(8.dp)
                                 )
+                            }
+                        }
+                    }
+                    Box {
+                        IconButton(
+                            onClick = {
+                                viewModel.vExpanded = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Preview,
+                                contentDescription = "Show AI Result",
+                                tint = onBackground,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = viewModel.vExpanded,
+                            onDismissRequest = { viewModel.vExpanded = false },
+                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
+                        ){
+                            Column{
+                                boxes.forEach {
+                                    Text(text = "${it.description} (${((it.score ?: 0f) * 100).toInt()}%)", style = TextStyle(color = onBackground, fontSize = 18.sp,))
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
                             }
                         }
                     }

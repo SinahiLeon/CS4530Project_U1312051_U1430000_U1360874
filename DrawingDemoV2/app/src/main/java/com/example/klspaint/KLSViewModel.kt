@@ -96,6 +96,8 @@ class KLSViewModel(
     var pExpanded by mutableStateOf(false)
     var cExpanded by mutableStateOf(false)
     var sExpanded by mutableStateOf(false)
+    var vExpanded by mutableStateOf(false)
+
 
     var overlayVisible by mutableStateOf(false)
 
@@ -231,6 +233,7 @@ class KLSViewModel(
         }
     }
 
+
 //    fun exportImage(fileName: String) {
 //        val bitmap = image ?: return
 //        viewModelScope.launch(Dispatchers.IO) {
@@ -320,12 +323,13 @@ class KLSViewModel(
                 val imageBytes = byteArrayOutputStream.toByteArray()
                 val base64Image = android.util.Base64.encodeToString(imageBytes, android.util.Base64.DEFAULT)
 
+                // Build the request object with specific parameters and the image
                 val requestObj = RequestObj(
                     requests = listOf(
                         Request(
                             image = Image(content = base64Image),
                             features = listOf(
-                                Feature(maxResults = 10, type = "OBJECT_LOCALIZATION"),
+                                Feature(maxResults = 10, type = "OBJECT_LOCALIZATION"), // can change the maxResults if needed
                             )
                         )
                     )
@@ -339,15 +343,16 @@ class KLSViewModel(
                     setBody(requestObj)
                 }
 
-                android.util.Log.d("VisionAPI", "Response status: ${httpResponse.status}")
+                if(httpResponse.status.value != 200) {
+                    println("Error trying to send request to Vision API: ${httpResponse.status}")
+                }
                 val response: ResponseObj = httpResponse.body()
-                android.util.Log.d("VisionAPI", "Parsed ResponseObj: $response")
 
 //                val width = bitmap.width.toFloat()
 //                val height = bitmap.height.toFloat()
 //                println("width: $width, height: $height")
 
-                // hardc-oded width and height instead.
+                // hard-coded width and height instead.
                 val boxes = parseVisionOutput(response, 1080f, 1760f)
                 _infoBoxes.value = boxes
                 overlayVisible = true
