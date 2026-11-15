@@ -49,7 +49,8 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.apply
 import kotlinx.serialization.Serializable
-//import com.google.ai.client.generativeai.GenerativeModel
+
+
 
 class KLSViewModel(
     private val repository: KLSRepository,
@@ -314,7 +315,9 @@ class KLSViewModel(
         val bitmap = this.image ?: return
         viewModelScope.launch() {
             try {
-                // From the documentation: BASE64_ENCODED_IMAGE: The base64 representation (ASCII string) of your binary image data. This string should look similar to the following string:
+                // From the documentation: BASE64_ENCODED_IMAGE: The base64
+                // representation (ASCII string) of your binary image data.
+                // This string should look similar to the following string:
                 //
                 //    /9j/4QAYRXhpZgAA...9tAVx/zDQDlGxn//2Q==
                 //
@@ -335,18 +338,8 @@ class KLSViewModel(
                     )
                 )
 
-                val apiKey = BuildConfig.VISION_API_KEY
-
-                // Make Ktor request
-                val httpResponse = ApiClient.client.post("https://vision.googleapis.com/v1/images:annotate?key=$apiKey") {
-                    contentType(ContentType.Application.Json)
-                    setBody(requestObj)
-                }
-
-                if(httpResponse.status.value != 200) {
-                    println("Error trying to send request to Vision API: ${httpResponse.status}")
-                }
-                val response: ResponseObj = httpResponse.body()
+                // Requirements specify the ViewModel calls Repo which communicates with Google API
+                val response: ResponseObj = repository.analyzeImage(requestObj)
 
 //                val width = bitmap.width.toFloat()
 //                val height = bitmap.height.toFloat()
