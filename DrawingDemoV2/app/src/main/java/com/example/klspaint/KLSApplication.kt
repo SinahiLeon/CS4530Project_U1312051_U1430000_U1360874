@@ -2,6 +2,8 @@ package com.example.klspaint
 
 import android.app.Application
 import androidx.room.Room
+import com.example.klspaint.data.KLSDatabase
+import com.example.klspaint.data.KLSRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlin.getValue

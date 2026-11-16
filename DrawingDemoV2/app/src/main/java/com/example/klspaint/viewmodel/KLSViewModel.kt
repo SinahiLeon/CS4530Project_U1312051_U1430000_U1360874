@@ -16,14 +16,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import com.example.klspaint.KLSRepository
+import com.example.klspaint.data.KLSRepository
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 

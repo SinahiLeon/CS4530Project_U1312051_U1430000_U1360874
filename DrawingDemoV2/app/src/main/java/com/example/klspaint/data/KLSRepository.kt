@@ -1,17 +1,19 @@
-package com.example.klspaint
+package com.example.klspaint.data
 
+import android.util.Log
+import com.example.klspaint.BuildConfig
 import com.example.klspaint.model.KLSDrawing
 import com.example.klspaint.viewmodel.ApiClient
 import com.example.klspaint.viewmodel.RequestObj
 import com.example.klspaint.viewmodel.ResponseObj
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class KLSRepository(val scope: CoroutineScope, private val dao: KLSDAO) {
     val allDrawings = dao.allDrawings()
@@ -39,7 +41,7 @@ class KLSRepository(val scope: CoroutineScope, private val dao: KLSDAO) {
             setBody(requestObj)
         }
         if (response.status.value !in 200..299) {
-            android.util.Log.e(
+            Log.e(
                 "VISION_TEST",
                 "Vision API error ${response.status}: ${response.bodyAsText()}"
             )

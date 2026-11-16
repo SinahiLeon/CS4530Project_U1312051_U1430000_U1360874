@@ -1,4 +1,4 @@
-package com.example.klspaint
+package com.example.klspaint.data
 
 import androidx.room.Dao
 import androidx.room.Database
