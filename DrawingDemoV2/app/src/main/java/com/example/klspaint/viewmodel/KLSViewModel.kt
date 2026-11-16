@@ -321,7 +321,7 @@ class KLSViewModel(
         }
     }
 
-    private fun parseVisionOutput(responseObj: ResponseObj, width: Float, height: Float): List<com.example.klspaint.model.KLSInfoBox> {
+    fun parseVisionOutput(responseObj: ResponseObj, width: Float, height: Float): List<com.example.klspaint.model.KLSInfoBox> {
         val boxes = mutableListOf<com.example.klspaint.model.KLSInfoBox>()
         try {
             responseObj.responses.forEach { response ->

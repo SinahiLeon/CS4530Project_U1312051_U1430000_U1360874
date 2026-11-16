@@ -15,6 +15,9 @@ import org.junit.Test
 import org.junit.Assert.*
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlinx.serialization.json.Json
+import com.example.klspaint.viewmodel.ResponseObj
+
 
 @RunWith(RobolectricTestRunner::class)
 class DrawingUnitTest {
@@ -63,5 +66,53 @@ class DrawingUnitTest {
         assertEquals(BrushType.LINE, viewModel.brushType)
         viewModel.changeBrushType(BrushType.CIRCLE)
         assertEquals(BrushType.CIRCLE, viewModel.brushType)
+    }
+
+
+    @Test
+    fun testAiResponseParsing() {
+        val json = """
+        {
+            "responses": [{
+                "localizedObjectAnnotations": [{
+                    "name": "Cat",
+                    "score": 0.95,
+                    "boundingPoly": {
+                        "normalizedVertices": [
+                            {"x": 0.1, "y": 0.2},
+                            {"x": 0.5, "y": 0.2},
+                            {"x": 0.5, "y": 0.6},
+                            {"x": 0.1, "y": 0.6}
+                        ]
+                    }
+                }]
+            }]
+        }
+    """.trimIndent()
+
+        val response = Json { ignoreUnknownKeys = true }
+            .decodeFromString<ResponseObj>(json)
+
+        val boxes = viewModel.parseVisionOutput(response, 1f, 1f)
+
+        assertEquals(1, boxes.size)
+        assertEquals("Cat", boxes[0].description)
+        assertEquals(0.95f, boxes[0].score ?: 0f, 0.001f)
+        assertEquals(0.1f, boxes[0].rect.left, 0.001f)
+        assertEquals(0.2f, boxes[0].rect.top, 0.001f)
+        assertEquals(0.5f, boxes[0].rect.right, 0.001f)
+        assertEquals(0.6f, boxes[0].rect.bottom, 0.001f)
+    }
+
+    @Test
+    fun testAiEmptyResponse() {
+        val json = """{"responses":[{}]}"""
+
+        val response = Json { ignoreUnknownKeys = true }
+            .decodeFromString<ResponseObj>(json)
+
+        val boxes = viewModel.parseVisionOutput(response, 1f, 1f)
+
+        assertTrue(boxes.isEmpty())
     }
 }

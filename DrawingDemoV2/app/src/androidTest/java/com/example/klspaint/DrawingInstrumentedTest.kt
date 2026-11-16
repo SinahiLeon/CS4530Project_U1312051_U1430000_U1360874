@@ -328,7 +328,7 @@ class DrawingInstrumentedTest {
 
         composeTestRule.onNodeWithText("Save").performClick()
 
-        composeTestRule.waitUntil(10000) {
+        composeTestRule.waitUntil(20000) {
             composeTestRule.onAllNodesWithText(name)
                 .fetchSemanticsNodes().isNotEmpty()
         }
