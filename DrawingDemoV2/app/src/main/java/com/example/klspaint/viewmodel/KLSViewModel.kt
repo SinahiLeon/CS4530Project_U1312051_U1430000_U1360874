@@ -181,6 +181,9 @@ class KLSViewModel(
                     _root_ide_package_.kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         image = it
                         canvas = _root_ide_package_.android.graphics.Canvas(it)
+
+                        println("analysing saved drawing...")
+                        getAiAnalysis(it.asImageBitmap())
                     }
                 }
             }
@@ -215,30 +218,6 @@ class KLSViewModel(
         }
     }
 
-
-//    fun exportImage(fileName: String) {
-//        val bitmap = image ?: return
-//        viewModelScope.launch(Dispatchers.IO) {
-//            val content = ContentValues().apply {
-//                put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
-//                put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-//                put(
-//                    MediaStore.MediaColumns.RELATIVE_PATH,
-//                    Environment.DIRECTORY_PICTURES + "/KLSPaint"
-//                )
-//            }
-//
-//            val imageUri = appContext.contentResolver.insert(
-//                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-//                content
-//            )
-//            imageUri?.let {
-//                appContext.contentResolver.openOutputStream(it).use {
-//                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it!!)
-//                }
-//            }
-//        }
-//    }
 
     fun shareDrawing(drawing: com.example.klspaint.model.KLSDrawing? = null) {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
