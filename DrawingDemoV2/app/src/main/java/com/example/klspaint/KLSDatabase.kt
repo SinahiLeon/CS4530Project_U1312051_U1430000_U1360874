@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import com.example.klspaint.model.KLSDrawing
 import kotlinx.coroutines.flow.Flow
 
 @Database(entities = [KLSDrawing::class], version = 1, exportSchema = false)

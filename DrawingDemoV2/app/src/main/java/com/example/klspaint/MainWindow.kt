@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.example.klspaint.ui.theme.Background
 import com.example.klspaint.ui.theme.onBackground
+import com.example.klspaint.viewmodel.KLSViewModel
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,8 +1,10 @@
 package com.example.klspaint
 
+import com.example.klspaint.model.KLSDrawing
+import com.example.klspaint.viewmodel.ApiClient
+import com.example.klspaint.viewmodel.RequestObj
+import com.example.klspaint.viewmodel.ResponseObj
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import io.ktor.client.call.body
 import io.ktor.client.request.post

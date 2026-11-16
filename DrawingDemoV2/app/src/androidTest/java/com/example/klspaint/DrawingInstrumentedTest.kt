@@ -26,7 +26,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
-
+import com.example.klspaint.viewmodel.KLSViewModel
 
 
 /**

@@ -1,55 +1,30 @@
-package com.example.klspaint
+package com.example.klspaint.viewmodel
 
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.content.FileProvider
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.klspaint.model.KLSDrawing
+import com.example.klspaint.model.KLSInfoBox
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import androidx.core.graphics.createBitmap
-import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import com.example.klspaint.KLSRepository
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.contentType
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import java.io.File
-import java.io.FileOutputStream
-import kotlin.apply
-import kotlinx.serialization.Serializable
-
 
 
 class KLSViewModel(
@@ -72,39 +47,41 @@ class KLSViewModel(
     var currentDrawingName by mutableStateOf("")
         private set
 
-    var image by mutableStateOf<Bitmap?>(null)
+    var image by _root_ide_package_.androidx.compose.runtime.mutableStateOf<android.graphics.Bitmap?>(
+        null
+    )
         private set
 
-    private var selectedPaint = Paint().apply {
+    private var selectedPaint = _root_ide_package_.android.graphics.Paint().apply {
         isAntiAlias = true
-        style = Paint.Style.FILL_AND_STROKE
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-        color = Color.Black.toArgb()
+        style = android.graphics.Paint.Style.FILL_AND_STROKE
+        strokeCap = android.graphics.Paint.Cap.ROUND
+        strokeJoin = android.graphics.Paint.Join.ROUND
+        color = androidx.compose.ui.graphics.Color.Black.toArgb()
         strokeWidth = 8f
     }
 
-    var selectedColor by mutableStateOf(Color.Black)
+    var selectedColor by _root_ide_package_.androidx.compose.runtime.mutableStateOf(androidx.compose.ui.graphics.Color.Black)
         private set
 
-    var penSize by mutableStateOf(8f)
+    var penSize by _root_ide_package_.androidx.compose.runtime.mutableStateOf(8f)
         private set
 
-    var brushType by mutableStateOf(BrushType.LINE)
+    var brushType by _root_ide_package_.androidx.compose.runtime.mutableStateOf(com.example.klspaint.BrushType.LINE)
         private set
 
-    private var canvas: Canvas? = null
-    var pExpanded by mutableStateOf(false)
-    var cExpanded by mutableStateOf(false)
-    var sExpanded by mutableStateOf(false)
-    var vExpanded by mutableStateOf(false)
+    private var canvas: android.graphics.Canvas? = null
+    var pExpanded by _root_ide_package_.androidx.compose.runtime.mutableStateOf(false)
+    var cExpanded by _root_ide_package_.androidx.compose.runtime.mutableStateOf(false)
+    var sExpanded by _root_ide_package_.androidx.compose.runtime.mutableStateOf(false)
+    var vExpanded by _root_ide_package_.androidx.compose.runtime.mutableStateOf(false)
 
 
-    var overlayVisible by mutableStateOf(false)
+    var overlayVisible by _root_ide_package_.androidx.compose.runtime.mutableStateOf(false)
 
-    private var lastOffset: Offset? = null // Offset represents 1 position using an X Y coordinate
+    private var lastOffset: androidx.compose.ui.geometry.Offset? = null // Offset represents 1 position using an X Y coordinate
 
-    fun changeColor(color: Color) {
+    fun changeColor(color: androidx.compose.ui.graphics.Color) {
         selectedColor = color
         selectedPaint.color = color.toArgb()
     }
@@ -114,33 +91,33 @@ class KLSViewModel(
         selectedPaint.strokeWidth = size
     }
 
-    fun changeBrushType(type: BrushType) {
+    fun changeBrushType(type: com.example.klspaint.BrushType) {
         brushType = type
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+    @androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.Q)
     fun createNewDrawing(width: Int = 1080, height: Int = 1920) {
-        val bitmap = createBitmap(width, height)
-        val thisCanvas = Canvas(bitmap)
+        val bitmap = _root_ide_package_.androidx.core.graphics.createBitmap(width, height)
+        val thisCanvas = _root_ide_package_.android.graphics.Canvas(bitmap)
         thisCanvas.drawColor(android.graphics.Color.WHITE)
         image = bitmap
         canvas = thisCanvas
-        currentDrawing = KLSDrawing(genFilePath())
+        currentDrawing = _root_ide_package_.com.example.klspaint.model.KLSDrawing(genFilePath())
         currentDrawingName = ""
     }
 
     // When the cursor first touches the screen, this function receives the loc of that cursor
-    fun startStroke(offset: Offset) {
+    fun startStroke(offset: androidx.compose.ui.geometry.Offset) {
         lastOffset = offset
         addPoint(offset)
     }
 
     // Receives the newest (x,y) position as the user's finger moves
-    fun addPoint(offset: Offset) {
+    fun addPoint(offset: androidx.compose.ui.geometry.Offset) {
         val thisCanvas = canvas ?: return
         val half = penSize / 2
         when (brushType) {
-            BrushType.LINE -> {
+            com.example.klspaint.BrushType.LINE -> {
                 val temp = lastOffset
                 if (temp != null) {
                     thisCanvas.drawLine(
@@ -151,11 +128,11 @@ class KLSViewModel(
                 }
             }
 
-            BrushType.CIRCLE -> {
+            com.example.klspaint.BrushType.CIRCLE -> {
                 thisCanvas.drawCircle(offset.x, offset.y, half, selectedPaint)
             }
 
-            BrushType.RECTANGLE -> {
+            com.example.klspaint.BrushType.RECTANGLE -> {
                 thisCanvas.drawRect(
                     offset.x - half, offset.y - half,
                     offset.x + half, offset.y + half, selectedPaint
@@ -170,7 +147,10 @@ class KLSViewModel(
     }
 
     private fun genFilePath(): String {
-        val file = File(appContext.filesDir, "img_${System.currentTimeMillis()}.png")
+        val file = _root_ide_package_.java.io.File(
+            appContext.filesDir,
+            "img_${System.currentTimeMillis()}.png"
+        )
         return file.absolutePath
     }
 
@@ -178,29 +158,29 @@ class KLSViewModel(
         val bitmap = image ?: return
         currentDrawing.name = name
         currentDrawingName = name
-        viewModelScope.launch(Dispatchers.IO) {
-            val file = File(currentDrawing.imagePath)
-            FileOutputStream(file).use {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val file = _root_ide_package_.java.io.File(currentDrawing.imagePath)
+            _root_ide_package_.java.io.FileOutputStream(file).use {
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
             }
 
             repository.addDrawing(currentDrawing)
         }
     }
 
-    fun loadDrawing(drawing: KLSDrawing) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun loadDrawing(drawing: com.example.klspaint.model.KLSDrawing) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             currentDrawing = drawing
             currentDrawingName = drawing.name
-            val file = File(drawing.imagePath)
+            val file = _root_ide_package_.java.io.File(drawing.imagePath)
             if (file.exists()) {
-                val bitmap = BitmapFactory
+                val bitmap = android.graphics.BitmapFactory
                     .decodeFile(file.absolutePath)
-                    .copy(Bitmap.Config.ARGB_8888, true)
+                    .copy(android.graphics.Bitmap.Config.ARGB_8888, true)
                 bitmap.let {
-                    withContext(Dispatchers.Main) {
+                    _root_ide_package_.kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         image = it
-                        canvas = Canvas(it)
+                        canvas = _root_ide_package_.android.graphics.Canvas(it)
                     }
                 }
             }
@@ -208,26 +188,27 @@ class KLSViewModel(
     }
 
     fun deleteDrawing() {
-        File(currentDrawing.imagePath).delete()
+        _root_ide_package_.java.io.File(currentDrawing.imagePath).delete()
         repository.deleteDrawing(currentDrawing)
     }
 
-    fun importImage(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun importImage(uri: android.net.Uri) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val inputStream = appContext.contentResolver.openInputStream(uri)
             val decodedBitmap =
-                BitmapFactory.decodeStream(inputStream)?.copy(Bitmap.Config.ARGB_8888, true)
+                android.graphics.BitmapFactory.decodeStream(inputStream)?.copy(android.graphics.Bitmap.Config.ARGB_8888, true)
             inputStream?.close()
-            currentDrawing = KLSDrawing(genFilePath(), "")
-            withContext(Dispatchers.Main) {
+            currentDrawing =
+                _root_ide_package_.com.example.klspaint.model.KLSDrawing(genFilePath(), "")
+            _root_ide_package_.kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                 currentDrawingName = ""
             }
 
             decodedBitmap?.let { bitmap ->
                 println("analyzing imported image...")
-                withContext(Dispatchers.Main) {
+                _root_ide_package_.kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                     image = bitmap
-                    canvas = Canvas(bitmap)
+                    canvas = _root_ide_package_.android.graphics.Canvas(bitmap)
                     getAiAnalysis(bitmap.asImageBitmap())
                 }
             }
@@ -259,11 +240,11 @@ class KLSViewModel(
 //        }
 //    }
 
-    fun shareDrawing(drawing: KLSDrawing? = null) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun shareDrawing(drawing: com.example.klspaint.model.KLSDrawing? = null) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val targetDrawing = drawing ?: currentDrawing
             val file = if (targetDrawing.imagePath.isNotBlank()) {
-                val existingFile = File(targetDrawing.imagePath)
+                val existingFile = _root_ide_package_.java.io.File(targetDrawing.imagePath)
                 // if a path and file exists, use it
                 if (existingFile.exists()) {
                     existingFile
@@ -272,37 +253,41 @@ class KLSViewModel(
                     val bitmap = image ?: return@launch
                     existingFile.parentFile?.mkdirs()
                     // save to file (same as in saveDrawing)
-                    FileOutputStream(existingFile).use {
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    _root_ide_package_.java.io.FileOutputStream(existingFile).use {
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
                     }
                     existingFile
                 }
             // if both a path and file do not exist, create a temporary path in the cache and add a file
             } else {
                 val bitmap = image ?: return@launch
-                val cacheFile = File(appContext.cacheDir, "shared_drawing_${System.currentTimeMillis()}.png")
-                FileOutputStream(cacheFile).use {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                val cacheFile = _root_ide_package_.java.io.File(
+                    appContext.cacheDir,
+                    "shared_drawing_${System.currentTimeMillis()}.png"
+                )
+                _root_ide_package_.java.io.FileOutputStream(cacheFile).use {
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
                 }
                 cacheFile
             }
 
 
-            val uri: Uri = FileProvider.getUriForFile(
+            val uri: android.net.Uri = androidx.core.content.FileProvider.getUriForFile(
                 appContext,
                 "${appContext.packageName}.provider",
                 file
             )
 
             // Pull up the sharing screen
-            val intent = Intent(Intent.ACTION_SEND).apply {
+            val intent = _root_ide_package_.android.content.Intent(android.content.Intent.ACTION_SEND)
+                .apply {
                 type = "image/png"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
-            val chooser = Intent.createChooser(intent, "Share Drawing").apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val chooser = android.content.Intent.createChooser(intent, "Share Drawing").apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
             }
 
             appContext.startActivity(chooser)
@@ -311,7 +296,7 @@ class KLSViewModel(
 
 
 
-    fun getAiAnalysis(image: ImageBitmap) {
+    fun getAiAnalysis(image: androidx.compose.ui.graphics.ImageBitmap) {
         android.util.Log.d("VISION_TEST", "AI ANALYSIS FUNCTION CALLED")
 
         val bitmap = this.image ?: return
@@ -324,7 +309,7 @@ class KLSViewModel(
                 //    /9j/4QAYRXhpZgAA...9tAVx/zDQDlGxn//2Q==
                 //
                 val byteArrayOutputStream = java.io.ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream)
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream)
                 val imageBytes = byteArrayOutputStream.toByteArray()
                 val base64Image = android.util.Base64.encodeToString(imageBytes, android.util.Base64.DEFAULT)
 
@@ -357,8 +342,8 @@ class KLSViewModel(
         }
     }
 
-    private fun parseVisionOutput(responseObj: ResponseObj, width: Float, height: Float): List<KLSInfoBox> {
-        val boxes = mutableListOf<KLSInfoBox>()
+    private fun parseVisionOutput(responseObj: ResponseObj, width: Float, height: Float): List<com.example.klspaint.model.KLSInfoBox> {
+        val boxes = mutableListOf<com.example.klspaint.model.KLSInfoBox>()
         try {
             responseObj.responses.forEach { response ->
                 response.localizedObjectAnnotations?.forEach { obj ->
@@ -384,7 +369,18 @@ class KLSViewModel(
                         val right = maxX * width
                         val bottom = maxY * height
 
-                        boxes.add(KLSInfoBox(Rect(left, top, right, bottom), obj.name, obj.score))
+                        boxes.add(
+                            _root_ide_package_.com.example.klspaint.model.KLSInfoBox(
+                                _root_ide_package_.androidx.compose.ui.geometry.Rect(
+                                    left,
+                                    top,
+                                    right,
+                                    bottom
+                                ),
+                                obj.name,
+                                obj.score
+                            )
+                        )
                     }
                 }
             }
@@ -396,13 +392,13 @@ class KLSViewModel(
 }
 
 // From HttpRequest Demo
-object ApiClient{
-    val client = HttpClient(Android){
-        install(ContentNegotiation){
+// From HttpRequest Demo
+object ApiClient {
+    val client = HttpClient(Android) {
+        install(ContentNegotiation) {
             json(Json {
                 isLenient = true
-                ignoreUnknownKeys =true
-
+                ignoreUnknownKeys = true
             })
         }
     }
@@ -424,24 +420,24 @@ object ApiClient{
 //    }
 //  ]
 //}
-@Serializable
+@kotlinx.serialization.Serializable
 data class RequestObj(
     val requests: List<Request>
 )
 
-@Serializable
+@kotlinx.serialization.Serializable
 data class Request(
     val image: Image,
     val features: List<Feature>
 )
 
-@Serializable
+@kotlinx.serialization.Serializable
 data class Image(
     val content: String
 )
 
 
-@Serializable
+@kotlinx.serialization.Serializable
 data class Feature(
     val maxResults: Int,
     val type: String
@@ -481,38 +477,40 @@ data class Feature(
 //     }
 //   ]
 // }
-@Serializable
+@kotlinx.serialization.Serializable
 data class ResponseObj(
     val responses: List<Response> = emptyList()
 )
 
-@Serializable
+@kotlinx.serialization.Serializable
 data class Response(
     val localizedObjectAnnotations: List<LocalizedObjectAnnotation>? = null,
 )
 
-@Serializable
+@kotlinx.serialization.Serializable
 data class LocalizedObjectAnnotation(
     val name: String? = null,
     val score: Float = 0f,
     val boundingPoly: BoundingPoly? = null
 )
-@Serializable
+
+@kotlinx.serialization.Serializable
 data class BoundingPoly(
     val normalizedVertices: List<NormalizedVertex>? = null
 )
 
-@Serializable
+@kotlinx.serialization.Serializable
 data class NormalizedVertex(
     val x: Float = 0f,
     val y: Float = 0f
 )
 
 object KLSViewModelProvider {
-    val Factory = viewModelFactory {
+    val Factory = _root_ide_package_.androidx.lifecycle.viewmodel.viewModelFactory {
         initializer {
-            val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as KLSApplication
-            KLSViewModel( app.klsRepository, app)
+            val app =
+                this[androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as com.example.klspaint.KLSApplication
+            KLSViewModel(app.klsRepository, app)
         }
     }
 }

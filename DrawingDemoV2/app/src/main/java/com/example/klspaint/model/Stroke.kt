@@ -1,7 +1,8 @@
-package com.example.klspaint
+package com.example.klspaint.model
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import com.example.klspaint.BrushType
 
 data class Stroke(
     val points: List<Offset>,

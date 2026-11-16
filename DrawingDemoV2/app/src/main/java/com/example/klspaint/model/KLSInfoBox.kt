@@ -1,4 +1,4 @@
-package com.example.klspaint
+package com.example.klspaint.model
 
 import androidx.compose.ui.geometry.Rect
 
