@@ -18,7 +18,7 @@ val secretsMap = if (secretsFile.exists()) {
 }
 
 //val apiKey = secretsMap["GEMINI_API_KEY"] ?: ""
-val visionApiKey = secretsMap["VISION_API_KEY"]
+val visionApiKey = secretsMap["VISION_API_KEY"] ?: ""
 
 android {
     namespace = "com.example.klspaint"

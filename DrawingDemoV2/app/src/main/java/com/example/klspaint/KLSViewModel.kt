@@ -312,6 +312,8 @@ class KLSViewModel(
 
 
     fun getAiAnalysis(image: ImageBitmap) {
+        android.util.Log.d("VISION_TEST", "AI ANALYSIS FUNCTION CALLED")
+
         val bitmap = this.image ?: return
         viewModelScope.launch() {
             try {
