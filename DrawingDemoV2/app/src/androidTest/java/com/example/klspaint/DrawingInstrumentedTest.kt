@@ -23,9 +23,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.performTextReplacement
+import com.example.klspaint.ui.BrushType
 import com.example.klspaint.viewmodel.KLSViewModel
 
 

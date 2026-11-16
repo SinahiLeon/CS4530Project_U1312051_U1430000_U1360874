@@ -1,5 +1,4 @@
-package com.example.klspaint
-
+package com.example.klspaint.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -43,34 +42,34 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.compose.ui.text.style.TextOverflow
-import com.example.klspaint.ui.theme.Background
-import com.example.klspaint.ui.theme.onBackground
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.klspaint.model.MaterialSymbolsArrowsOutput
+import com.example.klspaint.ui.theme.Background
+import com.example.klspaint.ui.theme.onBackground
 import com.example.klspaint.viewmodel.KLSViewModel
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -160,7 +159,8 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         DropdownMenu(
                             expanded = viewModel.pExpanded,
                             onDismissRequest = { viewModel.pExpanded = false },
-                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
+                            Modifier.background(Background)
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
 
                             ) {
                             Column {
@@ -191,8 +191,9 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         DropdownMenu(
                             expanded = viewModel.cExpanded,
                             onDismissRequest = { viewModel.cExpanded = false },
-                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
-                            ) {
+                            Modifier.background(Background)
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                        ) {
                             Column {
                                 Row {
                                     ColorButton(viewModel, Color.Magenta, "Magenta")
@@ -231,7 +232,8 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         DropdownMenu(
                             expanded = viewModel.sExpanded,
                             onDismissRequest = { viewModel.sExpanded = false },
-                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
+                            Modifier.background(Background)
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
 
                             ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -277,11 +279,15 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                         DropdownMenu(
                             expanded = viewModel.vExpanded,
                             onDismissRequest = { viewModel.vExpanded = false },
-                            Modifier.background(Background).padding(horizontal = 8.dp, vertical = 8.dp),
-                        ){
-                            Column{
+                            Modifier.background(Background)
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                        ) {
+                            Column {
                                 boxes.forEach {
-                                    Text(text = "${it.description} (${((it.score ?: 0f) * 100).toInt()}%)", style = TextStyle(color = onBackground, fontSize = 18.sp,))
+                                    Text(
+                                        text = "${it.description} (${((it.score ?: 0f) * 100).toInt()}%)",
+                                        style = TextStyle(color = onBackground, fontSize = 18.sp,)
+                                    )
                                     Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
@@ -332,12 +338,13 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                     )
                 }
             }
-            if(viewModel.overlayVisible) {
-                Canvas(modifier = Modifier
-                    .fillMaxSize()
-                    .clickable {
-                        viewModel.overlayVisible = false
-                    }
+            if (viewModel.overlayVisible) {
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable {
+                            viewModel.overlayVisible = false
+                        }
                 ) {
                     boxes.forEach {
                         drawRect(
@@ -346,7 +353,7 @@ fun CanvasScreen(viewModel: KLSViewModel, myNavController: NavHostController) {
                                 it.rect.left * size.width,
                                 it.rect.top * size.height
                             ),
-                            size = androidx.compose.ui.geometry.Size(
+                            size = Size(
                                 it.rect.width * size.width,
                                 it.rect.height * size.height
                             ),
@@ -460,7 +467,7 @@ fun ColorButton(viewModel: KLSViewModel, color: Color, colorName: String) {
             modifier = if (color == Color.Black) {
                 Modifier.border(width = 2.dp, color = Color.White, CircleShape)
             } else {
-                Modifier
+                Modifier.Companion
             }
         )
     }

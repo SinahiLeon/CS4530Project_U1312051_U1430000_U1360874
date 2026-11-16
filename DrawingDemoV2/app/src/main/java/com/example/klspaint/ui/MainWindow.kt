@@ -1,43 +1,48 @@
-package com.example.klspaint
+package com.example.klspaint.ui
 
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
-import androidx.compose.material3.Text
-import androidx.navigation.NavHostController
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Modifier
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.example.klspaint.ui.theme.Background
 import com.example.klspaint.ui.theme.onBackground
 import com.example.klspaint.viewmodel.KLSViewModel
+import androidx.compose.runtime.getValue
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,13 +124,14 @@ fun MainWindow(
                 .padding(innerPadding).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
 
-        ) {
-                Spacer(modifier = Modifier.height(20.dp))
+            ) {
+            Spacer(modifier = Modifier.height(20.dp))
 
-                //Display saved drawings
-                for (drawing in drawings) {
-                    if (drawing != null) {
-                        Button ( onClick = {
+            //Display saved drawings
+            for (drawing in drawings) {
+                if (drawing != null) {
+                    Button(
+                        onClick = {
                             klsViewModel.loadDrawing(drawing)
                             myNavController.navigate("canvas")
                         }, colors = ButtonDefaults.buttonColors(
@@ -136,15 +142,16 @@ fun MainWindow(
                             .semantics {
                                 contentDescription = "Drawing ${drawing.id}"
                             }
-                        ){
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ){
-                                Text("${drawing.name}", fontSize = 24.sp)
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Button(onClick={
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("${drawing.name}", fontSize = 24.sp)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Button(
+                                onClick = {
                                     klsViewModel.shareDrawing(drawing)
                                 }, colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.White,
@@ -153,16 +160,13 @@ fun MainWindow(
                                     .semantics {
                                         contentDescription = "Share drawing ${drawing.id}"
                                     }
-                                ){
-                                    Text("Share")
-                                }
-                            }
+                            ) {
+                                Text("Share")
                             }
                         }
                     }
                 }
             }
         }
-
-
-
+    }
+        }

@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import com.example.klspaint.data.KLSDAO
 import com.example.klspaint.data.KLSRepository
 import com.example.klspaint.model.KLSDrawing
+import com.example.klspaint.ui.BrushType
 import com.example.klspaint.viewmodel.KLSViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

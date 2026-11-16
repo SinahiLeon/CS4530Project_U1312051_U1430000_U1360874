@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import com.example.klspaint.data.KLSRepository
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.klspaint.ui.BrushType
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -66,7 +67,7 @@ class KLSViewModel(
     var penSize by _root_ide_package_.androidx.compose.runtime.mutableStateOf(8f)
         private set
 
-    var brushType by _root_ide_package_.androidx.compose.runtime.mutableStateOf(com.example.klspaint.BrushType.LINE)
+    var brushType by _root_ide_package_.androidx.compose.runtime.mutableStateOf(BrushType.LINE)
         private set
 
     private var canvas: android.graphics.Canvas? = null
@@ -90,7 +91,7 @@ class KLSViewModel(
         selectedPaint.strokeWidth = size
     }
 
-    fun changeBrushType(type: com.example.klspaint.BrushType) {
+    fun changeBrushType(type: BrushType) {
         brushType = type
     }
 
@@ -116,7 +117,7 @@ class KLSViewModel(
         val thisCanvas = canvas ?: return
         val half = penSize / 2
         when (brushType) {
-            com.example.klspaint.BrushType.LINE -> {
+            BrushType.LINE -> {
                 val temp = lastOffset
                 if (temp != null) {
                     thisCanvas.drawLine(
@@ -127,11 +128,11 @@ class KLSViewModel(
                 }
             }
 
-            com.example.klspaint.BrushType.CIRCLE -> {
+            BrushType.CIRCLE -> {
                 thisCanvas.drawCircle(offset.x, offset.y, half, selectedPaint)
             }
 
-            com.example.klspaint.BrushType.RECTANGLE -> {
+            BrushType.RECTANGLE -> {
                 thisCanvas.drawRect(
                     offset.x - half, offset.y - half,
                     offset.x + half, offset.y + half, selectedPaint
